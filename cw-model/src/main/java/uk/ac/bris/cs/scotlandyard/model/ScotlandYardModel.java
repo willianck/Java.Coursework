@@ -1,32 +1,25 @@
 package uk.ac.bris.cs.scotlandyard.model;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.unmodifiableCollection;
-import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.requireNonNull;
-import static uk.ac.bris.cs.scotlandyard.model.Colour.BLACK;
-import static uk.ac.bris.cs.scotlandyard.model.Ticket.DOUBLE;
-import static uk.ac.bris.cs.scotlandyard.model.Ticket.SECRET;
-
 import java.util.*;
-import java.util.function.Consumer;
-import uk.ac.bris.cs.gamekit.graph.Edge;
 import uk.ac.bris.cs.gamekit.graph.Graph;
 import uk.ac.bris.cs.gamekit.graph.ImmutableGraph;
+import java.util.concurrent.CopyOnWriteArrayList;
+import static java.util.Objects.requireNonNull;
+import static uk.ac.bris.cs.scotlandyard.model.Colour.BLACK;
 
 
-// TODO implement all methods and pass all tests
+
 public class ScotlandYardModel implements ScotlandYardGame {
-
-	List<Boolean> rounds;
-	Graph<Integer, Transport> graph;
-
+	private List<Boolean> rounds;
+	private Graph<Integer, Transport> graph;
+	private ArrayList<PlayerConfiguration> configurations = new ArrayList<>();
+	private List<ScotlandYardPlayer> players = new ArrayList<>();
+	private int currentPlayer;
+	private int currentRound = ScotlandYardView.NOT_STARTED;
+	private Collection<Spectator> spectators = new CopyOnWriteArrayList<>();
+	private int lastLocation = 0;
 	public ScotlandYardModel(List<Boolean> rounds, Graph<Integer, Transport> graph,
-			PlayerConfiguration mrX, PlayerConfiguration firstDetective,
-			PlayerConfiguration... restOfTheDetectives) {
+							 PlayerConfiguration mrX, PlayerConfiguration firstDetective,
+							 PlayerConfiguration... restOfTheDetectives) {
 
 		this.rounds = requireNonNull(rounds);
 		if (rounds.isEmpty()) {
@@ -45,11 +38,10 @@ public class ScotlandYardModel implements ScotlandYardGame {
 
 		List<PlayerConfiguration> configurations = new ArrayList<>();
 		configurations.add(0, mrX);
-		configurations.add(1,firstDetective);
+		configurations.add(0,firstDetective);
+
 		for (PlayerConfiguration configuration : restOfTheDetectives) {
 			configurations.add(requireNonNull(configuration));
-
-
 		}
 
 		Set<Integer> set = new HashSet<>();
@@ -66,7 +58,7 @@ public class ScotlandYardModel implements ScotlandYardGame {
 				throw new IllegalArgumentException("Duplicate colour");
 			set1.add(configuration.colour);
 		}
-		
+
 		for(PlayerConfiguration configuration : configurations) {
 			if (configuration.tickets.get(Ticket.SECRET) == null)
 				throw new IllegalArgumentException("ALL TYPE TICKET MUST EXIST");
@@ -84,7 +76,6 @@ public class ScotlandYardModel implements ScotlandYardGame {
 				throw new IllegalArgumentException("Detectives Do not have DOUBLE TICKETS");
 		}
 
-		List<ScotlandYardPlayer> players = new ArrayList<>();
 		players.add(0,new ScotlandYardPlayer(mrX.player,mrX.colour,mrX.location,mrX.tickets));
 		players.add(1,new ScotlandYardPlayer(firstDetective.player,firstDetective.colour,firstDetective.location,firstDetective.tickets));
 		for(PlayerConfiguration configuration : restOfTheDetectives)
@@ -111,62 +102,75 @@ public class ScotlandYardModel implements ScotlandYardGame {
 
 	@Override
 	public Collection<Spectator> getSpectators() {
-		// TODO
-		throw new RuntimeException("Implement me");
+		return Collections.unmodifiableCollection(spectators);
 	}
 
 	@Override
 	public List<Colour> getPlayers() {
-		// TODO
-		throw new RuntimeException("Implement me");
+		List<Colour> colours = new ArrayList<>();
+		for(ScotlandYardPlayer player : players){
+			colours.add(player.colour());
+		}
+		return Collections.unmodifiableList(colours);
 	}
 
 	@Override
 	public Set<Colour> getWinningPlayers() {
-		// TODO
-		throw new RuntimeException("Implement me");
+		Set<Colour> checkW = new HashSet<>();
+		return Collections.unmodifiableSet(checkW);
+
 	}
 
 	@Override
 	public Optional<Integer> getPlayerLocation(Colour colour) {
-		// TODO
-		throw new RuntimeException("Implement me");
+		for (ScotlandYardPlayer player : players){
+			if (colour == player.colour()){
+				if (player.isDetective()){
+					return  Optional.of(player.location());
+				}
+				else{
+					return Optional.of(lastLocation);
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	@Override
 	public Optional<Integer> getPlayerTickets(Colour colour, Ticket ticket) {
-		// TODO
-		throw new RuntimeException("Implement me");
+		for (ScotlandYardPlayer SYP : players){
+			if (colour == SYP.colour()){
+				if (SYP.tickets().containsKey(ticket)){
+					return Optional.of(SYP.tickets().get(ticket));
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	@Override
 	public boolean isGameOver() {
-		// TODO
-		throw new RuntimeException("Implement me");
+		return false;
 	}
 
 	@Override
 	public Colour getCurrentPlayer() {
-		// TODO
-		throw new RuntimeException("Implement me");
+		return getPlayers().get(currentPlayer);
 	}
 
 	@Override
 	public int getCurrentRound() {
-		// TODO
-		throw new RuntimeException("Implement me");
+		return currentRound;
 	}
 
 	@Override
 	public List<Boolean> getRounds() {
-		// TODO
-		throw new RuntimeException("Implement me");
+		return Collections.unmodifiableList(rounds);
 	}
 
 	@Override
 	public Graph<Integer, Transport> getGraph() {
-		// TODO
-		throw new RuntimeException("Implement me");
+		return new ImmutableGraph<Integer, Transport>(graph);
 	}
 
 }
