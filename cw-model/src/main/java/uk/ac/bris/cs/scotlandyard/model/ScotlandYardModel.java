@@ -3,20 +3,22 @@ import java.util.*;
 import uk.ac.bris.cs.gamekit.graph.Graph;
 import uk.ac.bris.cs.gamekit.graph.ImmutableGraph;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
+
 import static java.util.Objects.requireNonNull;
 import static uk.ac.bris.cs.scotlandyard.model.Colour.BLACK;
 
 
 
-public class ScotlandYardModel implements ScotlandYardGame {
+public class ScotlandYardModel implements ScotlandYardGame,Consumer<Move>, MoveVisitor {
 	private List<Boolean> rounds;
 	private Graph<Integer, Transport> graph;
-	private ArrayList<PlayerConfiguration> configurations = new ArrayList<>();
 	private List<ScotlandYardPlayer> players = new ArrayList<>();
-	private int currentPlayer;
+	private int currentPlayer = 0;
 	private int currentRound = ScotlandYardView.NOT_STARTED;
 	private Collection<Spectator> spectators = new CopyOnWriteArrayList<>();
 	private int lastLocation = 0;
+
 	public ScotlandYardModel(List<Boolean> rounds, Graph<Integer, Transport> graph,
 							 PlayerConfiguration mrX, PlayerConfiguration firstDetective,
 							 PlayerConfiguration... restOfTheDetectives) {
@@ -25,6 +27,7 @@ public class ScotlandYardModel implements ScotlandYardGame {
 		if (rounds.isEmpty()) {
 			throw new IllegalArgumentException("Empty rounds");
 		}
+
 
 		this.graph = requireNonNull(graph);
 		if (graph.isEmpty()) {
@@ -37,8 +40,8 @@ public class ScotlandYardModel implements ScotlandYardGame {
 		}
 
 		List<PlayerConfiguration> configurations = new ArrayList<>();
-		configurations.add(0, mrX);
 		configurations.add(0,firstDetective);
+		configurations.add(0, mrX);
 
 		for (PlayerConfiguration configuration : restOfTheDetectives) {
 			configurations.add(requireNonNull(configuration));
@@ -58,6 +61,8 @@ public class ScotlandYardModel implements ScotlandYardGame {
 				throw new IllegalArgumentException("Duplicate colour");
 			set1.add(configuration.colour);
 		}
+
+
 
 		for(PlayerConfiguration configuration : configurations) {
 			if (configuration.tickets.get(Ticket.SECRET) == null)
@@ -80,29 +85,61 @@ public class ScotlandYardModel implements ScotlandYardGame {
 		players.add(1,new ScotlandYardPlayer(firstDetective.player,firstDetective.colour,firstDetective.location,firstDetective.tickets));
 		for(PlayerConfiguration configuration : restOfTheDetectives)
 			players.add( new ScotlandYardPlayer(configuration.player,configuration.colour,configuration.location,configuration.tickets));
+
+
+
+	}
+	private ScotlandYardPlayer mrX(){
+	    return players.get(0);
+	}
+
+	private ArrayList<ScotlandYardPlayer> detectives(){
+		ArrayList<ScotlandYardPlayer> detective = new ArrayList<>();
+		for (int i = 1; i < players.size(); i++){
+			detective.add(players.get(i));
+		}
+		return detective;
+	}
+
+	private boolean mrXCaptured (){
+		for (ScotlandYardPlayer detective : detectives()){
+			if (mrX().location() == detective.location()){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public void registerSpectator(Spectator spectator) {
-		// TODO
-		throw new RuntimeException("Implement me");
+	  if (spectators.contains(requireNonNull(spectator))){
+	  	throw new IllegalArgumentException("A spectator is already registered. ");
+	  }
+	  else {
+	  	spectators.add(spectator);
+	  }
 	}
 
 	@Override
 	public void unregisterSpectator(Spectator spectator) {
-		// TODO
-		throw new RuntimeException("Implement me");
+	  if (spectators.contains(requireNonNull(spectator))){
+	  	spectators.remove(spectator);
+	  }
+	  else{
+	  	throw new IllegalArgumentException("No spectator is registered");
+	  }
 	}
 
 	@Override
 	public void startRotate() {
-		// TODO
-		throw new RuntimeException("Implement me");
+
+	    if(isGameOver()) throw new IllegalStateException("Game is over!");
 	}
 
 	@Override
 	public Collection<Spectator> getSpectators() {
 		return Collections.unmodifiableCollection(spectators);
+
 	}
 
 	@Override
@@ -150,6 +187,9 @@ public class ScotlandYardModel implements ScotlandYardGame {
 
 	@Override
 	public boolean isGameOver() {
+	    if (mrXCaptured() == true){
+	    	return true;
+		}
 		return false;
 	}
 
@@ -173,4 +213,8 @@ public class ScotlandYardModel implements ScotlandYardGame {
 		return new ImmutableGraph<Integer, Transport>(graph);
 	}
 
+	@Override
+	public void accept(Move move) {
+
+	}
 }
