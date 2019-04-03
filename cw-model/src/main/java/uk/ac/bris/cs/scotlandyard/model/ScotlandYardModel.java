@@ -97,6 +97,7 @@ public class ScotlandYardModel implements ScotlandYardGame,Consumer<Move>, MoveV
 		ArrayList<ScotlandYardPlayer> detective = new ArrayList<>();
 		for (int i = 1; i < players.size(); i++){
 			detective.add(players.get(i));
+
 		}
 		return detective;
 	}
