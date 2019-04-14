@@ -126,7 +126,6 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 		if(isGameOver ()){
 			throw new IllegalStateException ("Game can not  end on start Round ");
 		}
-
 		Set<Move> moves= requireNonNull(validMove(players.get(currentPlayer)));
 		Player player= players.get(currentPlayer).player();
 		player.makeMove(this, players.get(currentPlayer).location(), moves, this);
@@ -411,12 +410,16 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 	public void visit(PassMove move) {
 
 
+
 	}
 
 	@Override
 	public void visit(TicketMove move) {
 		ScotlandYardPlayer player = players.get(currentPlayer);
 		player.location(move.destination());
+		for(Spectator s : getSpectators()){
+			s.onMoveMade(this,move);
+		}
 		player.removeTicket(move.ticket());
 		//move to location and remove the ticket used
 
@@ -429,6 +432,7 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 				lastLocation = move.destination();
 			}
 			currentRound++;
+
 
 		}
 
@@ -456,14 +460,19 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 		player.removeTicket(move.firstMove().ticket());
 		player.removeTicket(move.secondMove().ticket());
 		player.removeTicket(DOUBLE);
-		currentRound=currentRound+2;
+		currentRound++;
+		for(Spectator s : getSpectators()) {
+		s.onRoundStarted(this, getCurrentRound());
+			currentRound++;
+		s.onRoundStarted(this, getCurrentRound());
+		}
 	}
 
 
 	@Override
 	public void accept(Move move) {
-		ScotlandYardPlayer player = players.get(currentPlayer);
-		Set<Move> moves = validMove(player);
+		ScotlandYardPlayer player;
+		Set<Move> moves = validMove(players.get(currentPlayer));
 		requireNonNull(move);
 		if (!moves.contains(move)) {
 			throw new IllegalArgumentException("It is Not a Valid Move ");
@@ -471,12 +480,16 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 		} else {
 			move.visit(this); // use visitor to see what ticket is used
 			player = NextPlayer();
-			if(!player.isMrX() && !isGameOver()) {
+			if (!player.isMrX() && !isGameOver()) {
 				Set<Move> NMove = (validMove(player));
 				player.player().makeMove(this, player.location(), NMove, this);
+				for (Spectator s : getSpectators()) {
+					s.onMoveMade(this, move);
+				}
 			}
 		}
 	}
+
 
 
 	@Override
