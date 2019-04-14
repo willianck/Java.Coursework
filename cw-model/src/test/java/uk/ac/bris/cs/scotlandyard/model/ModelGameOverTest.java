@@ -121,7 +121,6 @@ public class ModelGameOverTest extends ParameterisedModelTestBase {
 						player(BLACK).makeMove().willPick(taxi(104)),
 						// MrX will receive an extra bus ticket but he is still stuck
 						player(BLUE).makeMove().willPick(bus(105)),
-
 						// MrX will receive an extra TAXI ticket, he is now freed
 						player(RED).makeMove().willPick(taxi(118)))
 				// game is not over because MrX still has a spare TAXI ticket that he can use
@@ -198,7 +197,7 @@ public class ModelGameOverTest extends ParameterisedModelTestBase {
 		PlayerConfiguration blue = harness.newPlayer(BLUE, 108, 0,0,0,0,0);
 		ScotlandYardGame game = createGame(harness.newPlayer(BLACK, 86), blue);
 		// game is over with initial condition terminating setup
-                                      	assertThat(game.isGameOver()).isTrue();
+		assertThat(game.isGameOver()).isTrue();
 	}
 
 	@Test

@@ -118,10 +118,10 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 
 			throw new IllegalStateException ("Game can not  end on start Round ");
 		}
-
-		Set<Move> moves= requireNonNull(validMove(players.get(currentPlayer)));
+		Set<Move> moves= validMove(players.get(currentPlayer));
 		Player player= players.get(currentPlayer).player();
 		player.makeMove(this, players.get(currentPlayer).location(), moves, this);
+
 	}
 
 
@@ -138,6 +138,16 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 			colours.add(player.colour());
 		}
 		return Collections.unmodifiableList(colours);
+	}
+
+	private ScotlandYardPlayer playerNow(Colour c){
+		    ScotlandYardPlayer player=null;
+			for(ScotlandYardPlayer p : players){
+				if( c.equals(p.colour())) {
+					player=p;
+				}
+			}
+		return player;
 	}
 
 
@@ -400,58 +410,50 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 
 	@Override
 	public void visit(PassMove move) {
-
 		spectators.MoveisMade (this,move);
 	}
 
-	@Override
-	public void visit(TicketMove move) {
-		ScotlandYardPlayer player = players.get(currentPlayer);
-		/////////////////////////////////////
-		player.location(move.destination());
-		player.removeTicket(move.ticket());
-		if (player.isDetective()){
-			players.get(0).addTicket(move.ticket());
-		}
-		/////////////////////////////////////////
-
-
-		if (player.isMrX()) {
-
-			if (rounds.get(currentRound)){
-				lastLocation = move.destination();
-
-			}
-//			else{
-//				move = new TicketMove (move.colour (),move.ticket (),lastLocation);
-//
-//			}
-
-
-			currentRound++;
-			//spectators.RoundhasStarted (this,currentRound);
-
-
-
-		}
-
-		spectators.MoveisMade (this,move);
 
 
 
 
-	}
+    @Override
+    public void visit(TicketMove move) {
+        //ScotlandYardPlayer player = players.get(currentPlayer);
+        ScotlandYardPlayer player= playerNow(move.colour());
+        player.location(move.destination());
+        player.removeTicket(move.ticket());
 
-	@Override
-	public void visit(DoubleMove move) {
+        if (player.isDetective()){
+            players.get(0).addTicket(move.ticket());
+            spectators.MoveisMade(this,move);
+        }
+
+        else{
+            if (rounds.get(currentRound)){
+                lastLocation = move.destination();
+            }
+            TicketMove move1 = new TicketMove (move.colour (),move.ticket (),lastLocation);
+
+            currentRound++;
+            spectators.RoundhasStarted (this,currentRound);
+            spectators.MoveisMade(this,move1);
 
 
-        ScotlandYardPlayer player = players.get(currentPlayer);
+        }
+    }
+
+
+
+    @Override
+    public void visit(DoubleMove move) {
+
+        //ScotlandYardPlayer player = players.get(currentPlayer);
+        ScotlandYardPlayer player=playerNow(move.colour());
         player.location(move.finalDestination());
         player.removeTicket(DOUBLE);
         player.removeTicket(move.firstMove().ticket());
         player.removeTicket(move.secondMove().ticket());
-
 
         if (rounds.get(currentRound)) {
             lastLocation = move.firstMove().destination ();
@@ -477,7 +479,10 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
         spectators.RoundhasStarted (this,currentRound);
         spectators.MoveisMade(this,SMove);
 
+
     }
+
+
 
 
 
@@ -513,6 +518,8 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
         }
     }
 
+    
+
 
 	@Override
 	public Consumer<Move> andThen(Consumer<? super Move> after) {
@@ -525,3 +532,6 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 
 
 }
+
+
+
