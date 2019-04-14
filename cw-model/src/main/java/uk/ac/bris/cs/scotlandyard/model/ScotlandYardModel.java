@@ -449,24 +449,24 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
     @Override
     public void visit(DoubleMove move) {
 	    ScotlandYardPlayer player=playerNow(move.colour());
-        TicketMove FMove = new TicketMove(player.colour(),move.firstMove().ticket(),lastLocation);
-        TicketMove SMove= new TicketMove(player.colour(),move.secondMove().ticket(),lastLocation);
-        DoubleMove NotifyMove= new DoubleMove(player.colour(),FMove,SMove);
-
 
         if (rounds.get(currentRound)) {
             lastLocation = move.firstMove().destination ();
-        }
 
-        
+        }
+        TicketMove FMove = new TicketMove(player.colour(),move.firstMove().ticket(),lastLocation);
+
+
         if (rounds.get(currentRound + 1)){
             lastLocation = move.secondMove().destination();
         }
 
+        TicketMove SMove= new TicketMove(player.colour(),move.secondMove().ticket(),lastLocation);
 
 
 
 
+        DoubleMove NotifyMove= new DoubleMove(player.colour(),FMove,SMove);
 
         System.out.println ("----------------------->" + lastLocation);
 
