@@ -238,7 +238,7 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 
 		if(detectivesStuck()) return true;
 
-		if(players.get(currentPlayer).isMrX() && validMove(players.get(currentPlayer)).size()==0)
+		if(players.get(currentPlayer).isMrX() && validMove(players.get(currentPlayer)).isEmpty ())
 			return true;
 
 		return (isRoundsOver() && players.get(currentPlayer).isMrX());
@@ -265,7 +265,7 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 	@Override
 	public Graph<Integer, Transport> getGraph() {
 
-		return new ImmutableGraph<Integer, Transport>(graph);
+		return new ImmutableGraph <> (graph);
 	}
 
 	// Check if player has Double Tickets
@@ -326,7 +326,6 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 		filter_moves = filterTicket(filter_moves, p);
 		return filter_moves;
 	}
-
 	// gets the next player in the game
 	private ScotlandYardPlayer NextPlayer(){
 		ScotlandYardPlayer nextPlayer;
@@ -417,18 +416,16 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 		/////////////////////////////////////////
 
 
-
 		if (player.isMrX()) {
 
 			if (rounds.get(currentRound)){
 				lastLocation = move.destination();
 
 			}
-			else{
-				move = new TicketMove (move.colour (),move.ticket (),lastLocation);
-
-
-			}
+//			else{
+//				move = new TicketMove (move.colour (),move.ticket (),lastLocation);
+//
+//			}
 
 
 			currentRound++;
@@ -441,8 +438,6 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 		spectators.MoveisMade (this,move);
 
 
-		System.out.println ("-----------------> Here");
-
 
 
 	}
@@ -450,88 +445,73 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 	@Override
 	public void visit(DoubleMove move) {
 
-		ScotlandYardPlayer player = players.get(currentPlayer);
-		player.location(move.finalDestination());
+
+        ScotlandYardPlayer player = players.get(currentPlayer);
+        player.location(move.finalDestination());
+        player.removeTicket(DOUBLE);
+        player.removeTicket(move.firstMove().ticket());
+        player.removeTicket(move.secondMove().ticket());
+
+
+        if (rounds.get(currentRound)) {
+            lastLocation = move.firstMove().destination ();
+        }
+        TicketMove FMove= new TicketMove(player.colour(),move.firstMove().ticket(),lastLocation);
+
+        if (rounds.get(currentRound + 1)){
+            lastLocation = move.secondMove().destination();
+        }
+
+        TicketMove SMove= new TicketMove(player.colour(),move.secondMove().ticket(),lastLocation);
+
+
+        DoubleMove NotifyMove= new DoubleMove(player.colour(),FMove,SMove);
+        spectators.MoveisMade(this,NotifyMove);
+
+
+        currentRound++;
+        spectators.RoundhasStarted (this,currentRound);
+        spectators.MoveisMade(this,FMove);
+
+        currentRound++;
+        spectators.RoundhasStarted (this,currentRound);
+        spectators.MoveisMade(this,SMove);
+
+    }
 
 
 
-		DoubleMove doubleMove = new DoubleMove (player.colour (),move.firstMove (),move.secondMove ());
-		spectators.MoveisMade (this,doubleMove);
-		player.removeTicket(DOUBLE);
-
-		player.removeTicket(move.firstMove().ticket());
-		player.location ( move.firstMove ().destination ()) ;
-
-		player.removeTicket(move.secondMove().ticket());
-		player.location ( move.secondMove ().destination ()) ;
 
 
+    @Override
+    public void accept(Move move) {
+        requireNonNull(move);
+        ScotlandYardPlayer player;
+        Set<Move> moves = validMove(players.get(currentPlayer));
+        player=NextPlayer();
+        if (!moves.contains(move)) {
+            throw new IllegalArgumentException("It is Not a Valid Move ");
+
+        } else {
+
+            move.visit(this); // use visitor to see what ticket is used
 
 
-		currentRound++;
-		spectators.RoundhasStarted (this,currentRound);
-		spectators.MoveisMade (this,move.firstMove ());
+            if(!player.isMrX() && !isGameOver()) {
+                Set<Move> NMove = (validMove(player));
+                player.player().makeMove(this, player.location(), NMove, this);
 
-		currentRound++;
-
-		spectators.RoundhasStarted (this,currentRound);
-		spectators.MoveisMade (this,move.secondMove ());
-
-
-		if (!rounds.get(currentRound)) {
-			player.location(lastLocation);
-		}
-		else{
-			lastLocation = move.firstMove ().destination ();
-			player.location (lastLocation);
-		}
-
-
-		if (!rounds.get(currentRound + 1)){
-			player.location(lastLocation);
-		}
-		else{
-			lastLocation = move.secondMove().destination();
-			player.location(lastLocation);
-
-		}
-
-	}
-
-
-
-	@Override
-	public void accept(Move move) {
-		ScotlandYardPlayer player = players.get(currentPlayer);
-		Set<Move> moves = validMove(player);
-		requireNonNull(move);
-
-		if (!moves.contains(move)) {
-			throw new IllegalArgumentException("It is Not a Valid Move ");
-
-		} else {
-			move.visit(this); // use visitor to see what ticket is used
-			player = NextPlayer();
-
-			if(!player.isMrX() && !isGameOver()) {
-				Set<Move> NMove = (validMove(player));
-				player.player().makeMove(this, player.location(), NMove, this);
-
-				//spectators.GameisOver (this,getWinningPlayers ());
-			}
-			else{
-				if(isGameOver ()){
-					spectators.GameisOver (this,getWinningPlayers ());
-				}
-				else{
-					spectators.RotationisComplete (this);
-				}
-				//spectators.RotationisComplete (this);
-
-
-			}
-		}
-	}
+            }
+            else{
+                if(isGameOver ()){
+                    spectators.GameisOver (this,getWinningPlayers ());
+                }
+                else{
+                    spectators.RotationisComplete (this);
+                }
+            }
+        }
+    }
 
 
 	@Override
