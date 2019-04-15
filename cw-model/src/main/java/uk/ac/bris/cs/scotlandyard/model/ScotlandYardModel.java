@@ -467,6 +467,7 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 
 		if (rounds.get(currentRound + 1)){
 			l = move.secondMove().destination();
+			
 		}
 
 		TicketMove SMove= new TicketMove(player.colour(),move.secondMove().ticket(),l);
