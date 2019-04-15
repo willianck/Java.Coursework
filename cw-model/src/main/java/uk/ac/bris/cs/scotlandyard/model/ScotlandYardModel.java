@@ -85,8 +85,8 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 		}
 		//mutable list of players in ScotlandYard
 		players.add(0, new ScotlandYardPlayer(mrX.player, mrX.colour, mrX.location, mrX.tickets));
-		players.add(1, new ScotlandYardPlayer(firstDetective.player, firstDetective.colour, firstDetective.location,
-				firstDetective.tickets));
+		players.add(1, new ScotlandYardPlayer(firstDetective.player,firstDetective.colour,
+				firstDetective.location, firstDetective.tickets));
 		for (PlayerConfiguration configuration : restOfTheDetectives)
 			players.add(new ScotlandYardPlayer(configuration.player, configuration.colour, configuration.location,
 					configuration.tickets));
@@ -312,11 +312,11 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 			}
 		}
 	}
-	
+
 	//If it's a reveal round updates lastLocation
 	private int updateLastLocation(int storedLastLocation, int move, int round){
 		if (rounds.get(round)) {
-			  storedLastLocation = move ;
+			storedLastLocation = move ;
 		}
 		return storedLastLocation;
 	}
