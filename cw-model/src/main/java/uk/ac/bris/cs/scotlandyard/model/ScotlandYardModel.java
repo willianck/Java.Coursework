@@ -141,12 +141,12 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 	}
 
 	private ScotlandYardPlayer playerNow(Colour c){
-		    ScotlandYardPlayer player=null;
-			for(ScotlandYardPlayer p : players){
-				if( c.equals(p.colour())) {
-					player=p;
-				}
+		ScotlandYardPlayer player=null;
+		for(ScotlandYardPlayer p : players){
+			if( c.equals(p.colour())) {
+				player=p;
 			}
+		}
 		return player;
 	}
 
@@ -414,122 +414,135 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 	}
 
 
+	@Override
+	public void visit(TicketMove move) {
+		//ScotlandYardPlayer player = players.get(currentPlayer);
+		ScotlandYardPlayer player= playerNow(move.colour());
+		player.location(move.destination());
+		player.removeTicket(move.ticket());
 
 
 
-    @Override
-    public void visit(TicketMove move) {
-        //ScotlandYardPlayer player = players.get(currentPlayer);
-        ScotlandYardPlayer player= playerNow(move.colour());
-        player.location(move.destination());
-        player.removeTicket(move.ticket());
+		if (player.isDetective()){
+			players.get(0).addTicket(move.ticket());
+			spectators.MoveisMade(this,move);
+		}
+
+		else{
+			if (rounds.get(currentRound)){
+				lastLocation = move.destination();
+			}
+			TicketMove move1 = new TicketMove (move.colour (),move.ticket (),lastLocation);
+
+			currentRound++;
+			spectators.RoundhasStarted (this,currentRound);
+			spectators.MoveisMade(this,move1);
 
 
-        if (player.isDetective()){
-            players.get(0).addTicket(move.ticket());
-            spectators.MoveisMade(this,move);
-        }
+		}
 
-        else{
-            if (rounds.get(currentRound)){
-                lastLocation = move.destination();
-            }
-            TicketMove move1 = new TicketMove (move.colour (),move.ticket (),lastLocation);
-
-            currentRound++;
-            spectators.RoundhasStarted (this,currentRound);
-            spectators.MoveisMade(this,move1);
-
-
-        }
-    }
+	}
 
 
 
-    @Override
-    public void visit(DoubleMove move) {
-	    ScotlandYardPlayer player=playerNow(move.colour());
-        TicketMove FMove = new TicketMove(player.colour(),move.firstMove().ticket(),lastLocation);
-        TicketMove SMove= new TicketMove(player.colour(),move.secondMove().ticket(),lastLocation);
-        DoubleMove NotifyMove= new DoubleMove(player.colour(),FMove,SMove);
+	@Override
+	public void visit(DoubleMove move) {
+		ScotlandYardPlayer player=playerNow(move.colour());
+         int l = lastLocation;
+         int firstL = lastLocation;
 
 
-        if (rounds.get(currentRound)) {
-            lastLocation = move.firstMove().destination ();
-        }
+		player.removeTicket(DOUBLE);
 
-        
-        if (rounds.get(currentRound + 1)){
-            lastLocation = move.secondMove().destination();
-        }
+		System.out.println ( "before" + "----------------------->" + lastLocation);
+		if (rounds.get(currentRound)) {
+			l = move.firstMove().destination ();
+			firstL = l;
 
 
 
+		}
+		TicketMove FMove = new TicketMove(player.colour(),move.firstMove().ticket(),l);
+
+
+		if (rounds.get(currentRound + 1)){
+			l = move.secondMove().destination();
+		}
+
+		TicketMove SMove= new TicketMove(player.colour(),move.secondMove().ticket(),l);
 
 
 
-        System.out.println ("----------------------->" + lastLocation);
 
-        player.removeTicket(DOUBLE);
-        spectators.MoveisMade(this,NotifyMove);
+		DoubleMove NotifyMove= new DoubleMove(player.colour(),FMove,SMove);
 
-
-
-        player.removeTicket(move.firstMove().ticket());
-
-
-        currentRound++;
-        spectators.RoundhasStarted (this,currentRound);
-        spectators.MoveisMade(this,FMove);
-
-
-        player.removeTicket(move.secondMove().ticket());
-
-        currentRound++;
-        spectators.RoundhasStarted (this,currentRound);
-        spectators.MoveisMade(this,SMove);
-
-        player.location(move.finalDestination());
-
-
-
-    }
+		System.out.println ("after" + "----------------------->" + l);
 
 
 
 
 
+		spectators.MoveisMade(this,NotifyMove);
 
 
-    @Override
-    public void accept(Move move) {
-        requireNonNull(move);
-        ScotlandYardPlayer player;
-        Set<Move> moves = validMove(players.get(currentPlayer));
-        player=NextPlayer();
-        if (!moves.contains(move)) {
-            throw new IllegalArgumentException("It is Not a Valid Move ");
 
-        } else {
-
-            move.visit(this); // use visitor to see what ticket is used
+		lastLocation=firstL;
 
 
-            if(!player.isMrX() && !isGameOver()) {
-                Set<Move> NMove = (validMove(player));
-                player.player().makeMove(this, player.location(), NMove, this);
+		player.removeTicket(move.firstMove().ticket());
 
-            }
-            else{
-                if(isGameOver ()){
-                    spectators.GameisOver (this,getWinningPlayers ());
-                }
-                else{
-                    spectators.RotationisComplete (this);
-                }
-            }
-        }
-    }
+
+		currentRound++;
+		spectators.RoundhasStarted (this,currentRound);
+		spectators.MoveisMade(this,FMove);
+		player.location(move.firstMove().destination());
+
+		lastLocation=l;
+
+		player.removeTicket(move.secondMove().ticket());
+
+		currentRound++;
+		spectators.RoundhasStarted (this,currentRound);
+		spectators.MoveisMade(this,SMove);
+		player.location(move.secondMove().destination());
+
+	}
+
+
+
+
+
+
+
+	@Override
+	public void accept(Move move) {
+		requireNonNull(move);
+		ScotlandYardPlayer player;
+		Set<Move> moves = validMove(players.get(currentPlayer));
+		player=NextPlayer();
+		if (!moves.contains(move)) {
+			throw new IllegalArgumentException("It is Not a Valid Move ");
+
+		} else {
+
+			move.visit(this); // use visitor to see what ticket is used
+
+		}
+			if(!player.isMrX() && !isGameOver()) {
+				Set<Move> NMove = (validMove(player));
+				player.player().makeMove(this, player.location(), NMove, this);
+
+			}
+			else{
+				if(isGameOver ()){
+					spectators.GameisOver (this,getWinningPlayers ());
+				}
+				else{
+					spectators.RotationisComplete (this);
+				}
+			}
+
+	}
 
 
 
@@ -545,6 +558,3 @@ public   class ScotlandYardModel implements ScotlandYardGame , Consumer<Move> , 
 
 
 }
-
-
-
