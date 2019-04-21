@@ -143,6 +143,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 		for (ScotlandYardPlayer player : detective()) {
 			if (colour == player.colour()) {
 				return Optional.of(player.location());
+
 			}
 		}
 		if (colour.isMrX()){
@@ -378,7 +379,8 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 	private Set<Move> getMoves(int location) {
 		Set<Move> moves = new HashSet<>();
 		Collection<Edge<Integer, Transport>> possible_moves = PossibleMoves(location);
-		Collection<Edge<Integer, Transport>> possible_location = filterLocation(possible_moves);//
+
+        Collection<Edge<Integer, Transport>> possible_location = filterLocation(possible_moves);//
 		Collection<Edge<Integer, Transport>> player_moves = filterMoves(possible_moves, players.get(currentPlayer));
 		for (Edge<Integer, Transport> e : possible_location) {
 			if ((players.get(currentPlayer).hasTickets(SECRET))) {
