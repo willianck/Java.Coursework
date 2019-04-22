@@ -18,6 +18,7 @@ import com.google.common.base.MoreObjects;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import uk.ac.bris.cs.scotlandyard.ai.ManagedAI.VisualiserType;
 
+
 /**
  * <b> Not a public API, do not use!</b> <br>
  * Internal representation of an AI
