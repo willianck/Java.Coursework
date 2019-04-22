@@ -1,39 +1,39 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai;
 
+
 import uk.ac.bris.cs.scotlandyard.model.*;
 
 import java.util.*;
 
 
-@SuppressWarnings("CanBeFinal")
+
 public class AiHelper {
+
+    public  List<Boolean> rounds;
     private final List<ScotlandYardPlayer> players;
     private final Map <Colour, ScotlandYardPlayer> colourToPlayer;
+
+
+
     private final int currentRound;
-    private static List <Boolean> rounds;
-    private final ScotlandYardPlayer currentPlayer;
+    private ScotlandYardPlayer currentPlayer;
+
 
     AiHelper(ScotlandYardView view, int mrXLocation){
         players = getPlayerFromView (view, mrXLocation);
         colourToPlayer = setColoursToPlayersMap();
         currentRound = view.getCurrentRound();
         currentPlayer = colourToPlayer.get(view.getCurrentPlayer());
+        rounds = view.getRounds();
 
     }
 
     public AiHelper(AiHelper aiHelper) {
-        this.players = getPlayers (aiHelper.players);
+        this.players = copyPlayers (aiHelper.players);
         this.colourToPlayer = this.setColoursToPlayersMap();
         this.currentRound = aiHelper.currentRound;
         this.currentPlayer = this.players.get(aiHelper.players.lastIndexOf(aiHelper.currentPlayer));
-    }
-
-    public  List <Boolean> getRounds() {
-        return rounds;
-    }
-
-    public static void setRounds(List <Boolean> rounds) {
-        AiHelper.rounds = rounds;
+        this.rounds = getRounds();
     }
 
     //Returns a list of detectives
@@ -46,9 +46,18 @@ public class AiHelper {
         }
         return detectives;
     }
-
-    private List<ScotlandYardPlayer> getPlayers(List<ScotlandYardPlayer> players) {
+    public int getCurrentRound() {
+        return currentRound;
+    }
+    public List<Boolean> getRounds() {
+        return rounds;
+    }
+    private List<ScotlandYardPlayer> copyPlayers(List<ScotlandYardPlayer> players) {
         return new ArrayList<>(players);
+    }
+
+    public List<ScotlandYardPlayer> getPlayers() {
+        return Collections.unmodifiableList(players);
     }
 
     private Map<Colour, ScotlandYardPlayer> setColoursToPlayersMap() {
@@ -68,8 +77,21 @@ public class AiHelper {
         return ticketColourMap;
     }
 
+    int getPlayerTickets(Colour colour, Ticket ticket) {
+        return colourToPlayer.get(colour).tickets().get(ticket);
+    }
+
+
+    int getPlayerLocation(Colour colour) {
+        return colourToPlayer.get(colour).location();
+    }
+
+    public ScotlandYardPlayer getCurrentPlayer() {
+        return currentPlayer;
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    List<ScotlandYardPlayer> getPlayerFromView(ScotlandYardView view, int mrXLocation) {
+   private List<ScotlandYardPlayer> getPlayerFromView(ScotlandYardView view, int mrXLocation) {
         List<ScotlandYardPlayer> scotlandYardPlayerList = new ArrayList<>();
         List<Colour> players = view.getPlayers ();
         for (Colour c : players){
