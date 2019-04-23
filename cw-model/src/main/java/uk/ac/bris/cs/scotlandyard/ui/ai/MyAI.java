@@ -49,7 +49,7 @@ public class MyAI implements PlayerFactory {
 
 
             callback.accept(findNodes(validMoves.PossibleMoves(aiHelper.getPlayerLocation(view.getCurrentPlayer()))
-                 , aiHelper.getCurrentPlayer()));
+                    , aiHelper.getCurrentPlayer()));
 
 
         }
@@ -140,23 +140,23 @@ public class MyAI implements PlayerFactory {
             return 0;
         }
 
-      private List<Integer> ticketWeight( Colour colour) {
+        private List<Integer> ticketWeight( Colour colour) {
             List<Integer> ticketScore = new ArrayList<>();
-          int taxiWeight = 10;
-          int busWeight = 8;
-          int unaWeight = 8;
-          int secWeight = 4;
-          int doubtWeigh = 2;
+            int taxiWeight = 10;
+            int busWeight = 8;
+            int unaWeight = 8;
+            int secWeight = 4;
+            int doubtWeigh = 2;
 
-          for (Ticket t : Ticket.values()){
-              if (t == TAXI)ticketScore.add(aiHelper.getPlayerTickets(colour,TAXI) * taxiWeight);
-              if (t == BUS) ticketScore.add(aiHelper.getPlayerTickets(colour,BUS)* busWeight);
-              if (t == UNDERGROUND) ticketScore.add(aiHelper.getPlayerTickets(colour,UNDERGROUND) * unaWeight);
-              if (t == SECRET) ticketScore.add(aiHelper.getPlayerTickets(colour,SECRET) * secWeight);
-              if (t == DOUBLE) ticketScore.add(aiHelper.getPlayerTickets(colour,DOUBLE)* doubtWeigh);
-          }
-          return ticketScore;
-      }
+            for (Ticket t : Ticket.values()){
+                if (t == TAXI)ticketScore.add(aiHelper.getPlayerTickets(colour,TAXI) * taxiWeight);
+                if (t == BUS) ticketScore.add(aiHelper.getPlayerTickets(colour,BUS)* busWeight);
+                if (t == UNDERGROUND) ticketScore.add(aiHelper.getPlayerTickets(colour,UNDERGROUND) * unaWeight);
+                if (t == SECRET) ticketScore.add(aiHelper.getPlayerTickets(colour,SECRET) * secWeight);
+                if (t == DOUBLE) ticketScore.add(aiHelper.getPlayerTickets(colour,DOUBLE)* doubtWeigh);
+            }
+            return ticketScore;
+        }
 
     }
 }

@@ -91,16 +91,16 @@ public class AiHelper {
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-   private List<ScotlandYardPlayer> getPlayerFromView(ScotlandYardView view, int mrXLocation) {
+    private List<ScotlandYardPlayer> getPlayerFromView(ScotlandYardView view, int mrXLocation) {
         List<ScotlandYardPlayer> scotlandYardPlayerList = new ArrayList<>();
         List<Colour> players = view.getPlayers ();
         for (Colour c : players){
             int location;
             if (c.isMrX ()){
-                 location = mrXLocation;
+                location = mrXLocation;
             }
             else{
-                 location = view.getPlayerLocation (c).get ();
+                location = view.getPlayerLocation (c).get ();
             }
             scotlandYardPlayerList.add(new ScotlandYardPlayer(null, c, location, getTickets (view, c)));
         }
@@ -108,5 +108,3 @@ public class AiHelper {
     }
 
 }
-
-

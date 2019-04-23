@@ -1,3 +1,4 @@
+
 package uk.ac.bris.cs.scotlandyard.ui.ai;
 
 import uk.ac.bris.cs.gamekit.graph.Edge;
