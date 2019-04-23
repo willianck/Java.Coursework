@@ -35,7 +35,7 @@ public class MyAI implements PlayerFactory {
             Graph<Integer, Transport> graph = view.getGraph();
             validMoves = new ValidMoves();
             validMoves.setGraph(graph);
-            validMoves.setAiHelper(view,location);
+            validMoves.setAiHelper(view, location);
 
         }
 
@@ -47,7 +47,7 @@ public class MyAI implements PlayerFactory {
 
             MyPlayers(view, location);
 
-
+            System.out.println("COMMON : " + commonMoves());
             callback.accept(findNodes(validMoves.PossibleMoves(aiHelper.getPlayerLocation(view.getCurrentPlayer()))
                     , aiHelper.getCurrentPlayer()));
 
@@ -60,7 +60,7 @@ public class MyAI implements PlayerFactory {
             for (Edge<Integer, Transport> edge1 : edges) {
                 int destinationValue = edge1.destination().value();
                 if (validMoves.filterMoves(validMoves.PossibleMoves(destinationValue), player,
-                        aiHelper.detective()).size() > numNodes) {
+                        aiHelper.detective()).size() > numNodes && !commonMoves().contains(edge1)) {
                     numNodes = validMoves.filterMoves(validMoves.PossibleMoves(destinationValue), player,
                             aiHelper.detective()).size();
 
@@ -84,7 +84,8 @@ public class MyAI implements PlayerFactory {
 
             locationNode = findNodeHelper(player,edge,locationNode,availableNodes);
 
-            if(aiHelper.rounds.get(aiHelper.getCurrentRound())){
+
+            if(aiHelper.rounds.get(aiHelper.getCurrentRound()) && player.hasTickets(DOUBLE)){
                 Collection<Edge<Integer, Transport>> newEdges = validMoves.filterMoves
                         (validMoves.PossibleMoves(locationNode.destination().value()),player,aiHelper.detective());
 
@@ -92,6 +93,8 @@ public class MyAI implements PlayerFactory {
 
                 System.out.println("Edge " + edge);
                 System.out.println(locationNode);
+
+
 
                 return new DoubleMove(aiHelper.getCurrentPlayer().colour(),fromTransport(locationNode.data()),locationNode.destination().value(),
                         fromTransport(locationNode1.data()),locationNode1.destination().value());
@@ -101,6 +104,14 @@ public class MyAI implements PlayerFactory {
                         locationNode.destination().value());
             }
 
+        }
+        private Collection<Edge<Integer,Transport>> commonMoves(){
+            Collection<Edge<Integer,Transport>> commonEdge = new HashSet<>();
+
+            for(ScotlandYardPlayer player : aiHelper.detective()){
+                commonEdge.addAll(validMoves.filterMoves(validMoves.PossibleMoves(player.location()), player, aiHelper.detective()));
+            }
+            return commonEdge;
         }
 //
 //        private Move move(ScotlandYardView view){
@@ -121,42 +132,44 @@ public class MyAI implements PlayerFactory {
 //        }
 
 
-        private int ticket (Edge<Integer, Transport> edges){
-            Ticket ticket = fromTransport(edges.data());
-            List<Integer> ticketwight = ticketWeight(aiHelper.getCurrentPlayer().colour());
-
-            int taxi = ticketwight.get(0);
-            int bus = ticketwight.get(1);
-            int underground = ticketwight.get(2);
-            int doublem = ticketwight.get(3);
-            int secert = ticketwight.get(4);
-
-            if (ticket == TAXI) return taxi;
-            if (ticket == BUS) return bus;
-            if (ticket == UNDERGROUND) return underground;
-            if (ticket == SECRET) return secert;
-            if (ticket == DOUBLE) return doublem;
-
-            return 0;
-        }
-
-        private List<Integer> ticketWeight( Colour colour) {
-            List<Integer> ticketScore = new ArrayList<>();
-            int taxiWeight = 10;
-            int busWeight = 8;
-            int unaWeight = 8;
-            int secWeight = 4;
-            int doubtWeigh = 2;
-
-            for (Ticket t : Ticket.values()){
-                if (t == TAXI)ticketScore.add(aiHelper.getPlayerTickets(colour,TAXI) * taxiWeight);
-                if (t == BUS) ticketScore.add(aiHelper.getPlayerTickets(colour,BUS)* busWeight);
-                if (t == UNDERGROUND) ticketScore.add(aiHelper.getPlayerTickets(colour,UNDERGROUND) * unaWeight);
-                if (t == SECRET) ticketScore.add(aiHelper.getPlayerTickets(colour,SECRET) * secWeight);
-                if (t == DOUBLE) ticketScore.add(aiHelper.getPlayerTickets(colour,DOUBLE)* doubtWeigh);
-            }
-            return ticketScore;
-        }
-
+//        private int ticket (Edge<Integer, Transport> edges){
+//            Ticket ticket = fromTransport(edges.data());
+//            List<Integer> ticketwight = ticketWeight(aiHelper.getCurrentPlayer().colour());
+//
+//            int taxi = ticketwight.get(0);
+//            int bus = ticketwight.get(1);
+//            int underground = ticketwight.get(2);
+//            int doublem = ticketwight.get(3);
+//            int secert = ticketwight.get(4);
+//
+//            if (ticket == TAXI) return taxi;
+//            if (ticket == BUS) return bus;
+//            if (ticket == UNDERGROUND) return underground;
+//            if (ticket == SECRET) return secert;
+//            if (ticket == DOUBLE) return doublem;
+//
+//            return 0;
+//        }
+//
+//      private List<Integer> ticketWeight( Colour colour) {
+//            List<Integer> ticketScore = new ArrayList<>();
+//          int taxiWeight = 10;
+//          int busWeight = 8;
+//          int unaWeight = 8;
+//          int secWeight = 4;
+//          int doubtWeigh = 2;
+//
+//          for (Ticket t : Ticket.values()){
+//              if (t == TAXI)ticketScore.add(aiHelper.getPlayerTickets(colour,TAXI) * taxiWeight);
+//              if (t == BUS) ticketScore.add(aiHelper.getPlayerTickets(colour,BUS)* busWeight);
+//              if (t == UNDERGROUND) ticketScore.add(aiHelper.getPlayerTickets(colour,UNDERGROUND) * unaWeight);
+//              if (t == SECRET) ticketScore.add(aiHelper.getPlayerTickets(colour,SECRET) * secWeight);
+//              if (t == DOUBLE) ticketScore.add(aiHelper.getPlayerTickets(colour,DOUBLE)* doubtWeigh);
+//          }
+//          return ticketScore;
+//      }
+//
+//    }
     }
 }
+

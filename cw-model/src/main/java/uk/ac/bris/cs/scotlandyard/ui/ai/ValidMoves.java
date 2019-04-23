@@ -76,6 +76,7 @@ class ValidMoves{
     // Collection of edges accessible by the player
     Collection<Edge<Integer, Transport>> filterMoves(Collection<Edge<Integer, Transport>> edges,
                                                      ScotlandYardPlayer player, List<ScotlandYardPlayer> detective) {
+
         Collection<Edge<Integer, Transport>> filter_moves = filterLocation(edges,detective);
         filter_moves = filterTicket(filter_moves, player);
         return filter_moves;
