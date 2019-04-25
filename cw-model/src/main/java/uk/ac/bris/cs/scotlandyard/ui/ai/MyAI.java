@@ -29,7 +29,7 @@ public class MyAI implements PlayerFactory {
 
         private AiHelper aiHelper;
         private ValidMoves validMoves;
-        private Djikstra djikstra;
+        private Dijkstra dijkstra;
 
 
         void MyPlayers(ScotlandYardView view, int location) {
@@ -38,7 +38,7 @@ public class MyAI implements PlayerFactory {
             validMoves = new ValidMoves();
             validMoves.setGraph(graph);
             validMoves.setAiHelper(view, location);
-            djikstra = new Djikstra(view);
+            dijkstra = new Dijkstra(view);
 
         }
         private final Random random = new Random();
@@ -58,6 +58,12 @@ public class MyAI implements PlayerFactory {
             //System.out.println(getMinDistancesToNodes(view,location));
             //System.out.println("EDGE USED" + findNodes(aiHelper.getCurrentPlayer()));
             //System.out.println("EDGEMAP"
+//           System.out.println(Arrays.toString(dijkstra.ShortestPath(location)));
+//           System.out.println(dijkstra.ShortestPath(location));
+//            int[] dis = dijkstra.ShortestPath(location);
+//            System.out.println(Arrays.toString(dis));
+//            System.out.println(dis.length);
+
 
 
             callback.accept(move(moves,view,location));
@@ -71,13 +77,11 @@ public class MyAI implements PlayerFactory {
                 for(Move m : moves){
                     if(m.getClass() == DoubleMove.class){
                         douMoves.add((DoubleMove)m);
-
-
                     }
                 }
                 if(!douMoves.isEmpty()){
                     for(DoubleMove m : douMoves){
-                        if(m.finalDestination() == edgeIntegerHashMap(view,m.secondMove().destination()).destination().value()){
+                        if(m.finalDestination() == Objects.requireNonNull(edgeIntegerHashMap(view, m.secondMove().destination())).destination().value()){
                             return m;
                         }
                     }
@@ -91,6 +95,7 @@ public class MyAI implements PlayerFactory {
             }
 
 
+            assert edge != null;
             return new TicketMove(view.getCurrentPlayer(),fromTransport(edge.data()),edge.destination().value());
 
         }
@@ -104,21 +109,21 @@ public class MyAI implements PlayerFactory {
                 return null;
             }
 
-            System.out.println("SHOUYLD HAVE SECERT" + distanceFromMrXMap);
+          //  System.out.println("SHOUYLD HAVE SECERT" + distanceFromMrXMap);
             //System.out.println(distanceFromMrXMap.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey());
 
-            return distanceFromMrXMap.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey();
+            return distanceFromMrXMap.entrySet().stream().max((entry1, entry2) -> {
+                if (entry1.getValue() > entry2.getValue()) return 1;
+                else return 0;
+            }).get().getKey();
         }
-
-
-
 
         private HashMap<Edge<Integer,Transport>,Integer> findNodes( ScotlandYardView view, int location) {
             ScotlandYardPlayer player = aiHelper.getCurrentPlayer();
 
             Collection<Edge<Integer, Transport>> edge = validMoves.filterMoves(validMoves.PossibleMoves(player.location()), player, aiHelper.detective());
             edge.addAll(validMoves.getEdges(location,view));
-            Optional<Edge<Integer, Transport>> eps = validMoves.filterMoves(edge, player, aiHelper.detective()).stream().findFirst();
+
             HashMap<Edge<Integer,Transport>, Integer> edgeIntegerHashMap = new HashMap<>();
 
             int availableNodes = 1;
@@ -128,7 +133,7 @@ public class MyAI implements PlayerFactory {
                 int n = (int) Math.floor(validMoves.filterMoves(validMoves.PossibleMoves(destinationValue), player, aiHelper.detective()).size() / 2);
                 if (validMoves.filterMoves(validMoves.PossibleMoves(destinationValue), player,
                         aiHelper.detective()).size() > availableNodes) {
-                    edgeIntegerHashMap.put(edge1,0);
+                    edgeIntegerHashMap.put(edge1,n);
                     availableNodes = 1;
                 }
             }
@@ -138,31 +143,23 @@ public class MyAI implements PlayerFactory {
 
         private HashMap<Edge<Integer,Transport>,Integer> findNodess(ScotlandYardView view, int location) {
             int DD = 0;
-            List<Edge<Integer,Transport>> ee = new ArrayList<>(validMoves.PossibleMoves(location));
             List<Node<Integer>> dectiveNodeList = new ArrayList<>();
 
             for (ScotlandYardPlayer player : aiHelper.detective()){
                 dectiveNodeList.add(view.getGraph().getNode(player.location()));
             }
 
-            HashMap<Node<Integer>, Integer> distancesToNodes = djikstra.getMinDistancesToNodes(location);
+            HashMap<Node<Integer>, Integer> distancesToNodes = dijkstra.shortestPath(location);
             HashMap<Edge<Integer,Transport>,Integer> eddd = new HashMap<>();
             Collection<Edge<Integer,Transport>> edgeCollection =  validMoves.filterMoves(validMoves.PossibleMoves(aiHelper.getCurrentPlayer().location()),aiHelper.getCurrentPlayer(),aiHelper.detective());
             edgeCollection.addAll(validMoves.getEdges(location,view));
             for (Edge<Integer,Transport> e : edgeCollection) {
                 for (Node<Integer> node : dectiveNodeList) {
-                    if (distancesToNodes.get(node) == 1) {
-                        eddd.put(e,1);
-                    }
-                    if (distancesToNodes.get(node) == 2) {
-                        eddd.put(e,2);
-                    }
-                    if (distancesToNodes.get(node) == 3) {
-                        eddd.put(e,3);
-                    }
-                    if (distancesToNodes.get(node) > 3) {
-                        eddd.put(e,5);
-                    }
+                    if (distancesToNodes.get(node) == 1)  eddd.put(e,1);
+
+                    if (distancesToNodes.get(node) == 2) eddd.put(e, 2);
+                    if (distancesToNodes.get(node) == 3) eddd.put(e, 3);
+                    if (distancesToNodes.get(node) > 3) eddd.put(e, 5);
                 }
             }
 
@@ -170,12 +167,7 @@ public class MyAI implements PlayerFactory {
             System.out.println("This is largest node with disatnce found" + DD);
             return eddd;
         }
-
-
-
     }
-
-
 }
 
 

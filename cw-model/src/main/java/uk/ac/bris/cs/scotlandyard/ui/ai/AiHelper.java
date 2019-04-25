@@ -1,10 +1,10 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai;
 
 
+
 import uk.ac.bris.cs.scotlandyard.model.*;
 
 import java.util.*;
-
 
 
 public class AiHelper {
@@ -12,8 +12,6 @@ public class AiHelper {
     public  List<Boolean> rounds;
     private final List<ScotlandYardPlayer> players;
     private final Map <Colour, ScotlandYardPlayer> colourToPlayer;
-
-
 
     private final int currentRound;
     private ScotlandYardPlayer currentPlayer;
@@ -100,6 +98,9 @@ public class AiHelper {
         return scotlandYardPlayerList;
     }
 
+
+
 }
+
 
 
