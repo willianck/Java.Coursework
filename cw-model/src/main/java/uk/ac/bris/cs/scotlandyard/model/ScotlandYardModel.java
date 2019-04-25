@@ -291,6 +291,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 	public void accept(Move move) {
 		requireNonNull(move);
 		ScotlandYardPlayer player;
+
 		Set<Move> moves = validMove(players.get(currentPlayer));
 		player = NextPlayer();
 		if (!moves.contains(move)) {
@@ -382,6 +383,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 
         Collection<Edge<Integer, Transport>> possible_location = filterLocation(possible_moves);//
 		Collection<Edge<Integer, Transport>> player_moves = filterMoves(possible_moves, players.get(currentPlayer));
+
 		for (Edge<Integer, Transport> e : possible_location) {
 			if ((players.get(currentPlayer).hasTickets(SECRET))) {
 				moves.add(new TicketMove(players.get(currentPlayer).colour(), Ticket.SECRET, e.destination().value()));
@@ -396,7 +398,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 
 	// Special function to get the moves of MrX including double moves . Called on MrX to get his valid moves
 	private Set<Move> MrXMoves(ScotlandYardPlayer player) {
-		Set<Move> firstMoves = getMoves(players.get(0).location());
+		Set<Move>  firstMoves = getMoves(players.get(0).location());
 		Set<Move> DoubleMoves = new HashSet<>();
 		if ((player.hasTickets(DOUBLE)) && currentRound != rounds.size() - 1) {
 			for (Move init_move : firstMoves) {

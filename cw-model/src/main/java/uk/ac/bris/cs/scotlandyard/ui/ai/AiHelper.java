@@ -77,14 +77,7 @@ public class AiHelper {
         return ticketColourMap;
     }
 
-    int getPlayerTickets(Colour colour, Ticket ticket) {
-        return colourToPlayer.get(colour).tickets().get(ticket);
-    }
 
-
-    int getPlayerLocation(Colour colour) {
-        return colourToPlayer.get(colour).location();
-    }
 
     public ScotlandYardPlayer getCurrentPlayer() {
         return currentPlayer;

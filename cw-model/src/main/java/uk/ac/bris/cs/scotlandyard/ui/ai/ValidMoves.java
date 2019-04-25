@@ -7,6 +7,7 @@ import uk.ac.bris.cs.scotlandyard.model.*;
 import java.util.*;
 
 import static uk.ac.bris.cs.scotlandyard.model.Ticket.*;
+import static uk.ac.bris.cs.scotlandyard.model.Transport.FERRY;
 
 class ValidMoves{
 
@@ -60,17 +61,6 @@ class ValidMoves{
         }
         return filter_ticket;
     }
-//    public Collection<Edge<Integer, Transport>> tomove(Edge<Integer, Transport> edges,
-//                                                        ScotlandYardPlayer player){
-//        Collection<Edge<Integer, Transport>> moves = new HashSet<>();
-//
-//        for (Edge<Integer,Transport> e : PossibleMoves(player.location())){
-//            if (player.hasTickets(fromTransport(edges.data()))){
-//                moves.add(e);
-//            }
-//        }
-//        return moves;
-//    }
 
     // Collection of edges accessible by the player
     Collection<Edge<Integer, Transport>> filterMoves(Collection<Edge<Integer, Transport>> edges,
@@ -78,8 +68,31 @@ class ValidMoves{
 
         Collection<Edge<Integer, Transport>> filter_moves = filterLocation(edges,detective);
         filter_moves = filterTicket(filter_moves, player);
+
         return filter_moves;
     }
+
+    public Collection<Edge<Integer,Transport>> getEdges(int location,ScotlandYardView view){
+        Collection<Edge<Integer,Transport>>  edgeCollections = new HashSet<>();
+        Collection<Edge<Integer, Transport>> possible_moves = PossibleMoves(location);
+        Collection<Edge<Integer, Transport>> possible_location = filterLocation(possible_moves,aiHelper.detective());
+        Collection<Edge<Integer, Transport>> player_moves = filterMoves(possible_moves,aiHelper.getCurrentPlayer(),aiHelper.detective());
+
+
+        for (Edge<Integer, Transport> e : possible_location) {
+            if ((aiHelper.getCurrentPlayer().hasTickets(SECRET))) {
+                Edge<Integer,Transport> eEdge = new Edge<>(e.source(),view.getGraph().getNode(e.destination().value()),FERRY);
+                edgeCollections.add(eEdge);
+            }
+        }
+        for (Edge<Integer, Transport> e : player_moves) {
+           edgeCollections.add(e);
+        }
+
+
+        return edgeCollections;
+    }
+
 
     private Set<Move> getMoves(int location) {
         Set<Move> moves = new HashSet<>();

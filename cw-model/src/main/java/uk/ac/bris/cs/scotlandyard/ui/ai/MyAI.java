@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import uk.ac.bris.cs.gamekit.graph.Edge;
 import uk.ac.bris.cs.gamekit.graph.Graph;
+import uk.ac.bris.cs.gamekit.graph.Node;
 import uk.ac.bris.cs.scotlandyard.ai.ManagedAI;
 import uk.ac.bris.cs.scotlandyard.ai.PlayerFactory;
 import uk.ac.bris.cs.scotlandyard.model.*;
@@ -28,6 +29,7 @@ public class MyAI implements PlayerFactory {
 
         private AiHelper aiHelper;
         private ValidMoves validMoves;
+        private Djikstra djikstra;
 
 
         void MyPlayers(ScotlandYardView view, int location) {
@@ -36,8 +38,10 @@ public class MyAI implements PlayerFactory {
             validMoves = new ValidMoves();
             validMoves.setGraph(graph);
             validMoves.setAiHelper(view, location);
+            djikstra = new Djikstra(view);
 
         }
+        private final Random random = new Random();
 
         @Override
         public void makeMove(ScotlandYardView view, int location, Set<Move> moves,
@@ -46,130 +50,133 @@ public class MyAI implements PlayerFactory {
             // picks a random move4
 
             MyPlayers(view, location);
+            findNodess(view,location);
+//            System.out.println(location);
+////            System.out.println(validMoves.getEdges(location,view));
 
-            System.out.println("COMMON : " + commonMoves());
-            callback.accept(findNodes(validMoves.PossibleMoves(aiHelper.getPlayerLocation(view.getCurrentPlayer()))
-                    , aiHelper.getCurrentPlayer()));
+           // System.out.println( "I dont know "+ findNodeHelperList(aiHelper.getCurrentPlayer(),validMoves.PossibleMoves(location)));
+            //System.out.println(getMinDistancesToNodes(view,location));
+            //System.out.println("EDGE USED" + findNodes(aiHelper.getCurrentPlayer()));
+            //System.out.println("EDGEMAP"
 
 
+            callback.accept(move(moves,view,location));
         }
 
-        private Edge<Integer, Transport> findNodeHelper(ScotlandYardPlayer player, Collection<Edge<Integer,Transport>> edges, Edge<Integer,
-                Transport> edge, int numNodes){
+        private Move move (Set<Move> moves,ScotlandYardView view, int location){
+            Edge<Integer,Transport>edge = edgeIntegerHashMap(view,location);
+            Set<DoubleMove> douMoves = new HashSet<>();
 
-            for (Edge<Integer, Transport> edge1 : edges) {
-                int destinationValue = edge1.destination().value();
-                if (validMoves.filterMoves(validMoves.PossibleMoves(destinationValue), player,
-                        aiHelper.detective()).size() > numNodes && !commonMoves().contains(edge1)) {
-                    numNodes = validMoves.filterMoves(validMoves.PossibleMoves(destinationValue), player,
-                            aiHelper.detective()).size();
+            if(aiHelper.rounds.get(aiHelper.getCurrentRound()) && aiHelper.getCurrentPlayer().hasTickets(DOUBLE)){
+                for(Move m : moves){
+                    if(m.getClass() == DoubleMove.class){
+                        douMoves.add((DoubleMove)m);
 
-                    edge = edge1;
+
+                    }
+                }
+                if(!douMoves.isEmpty()){
+                    for(DoubleMove m : douMoves){
+                        if(m.finalDestination() == edgeIntegerHashMap(view,m.secondMove().destination()).destination().value()){
+                            return m;
+                        }
+                    }
                 }
 
             }
-            return edge;
+
+            if (edgeIntegerHashMap(view,location) == null){
+                System.out.println("EMPTY");
+                return new ArrayList<>(moves).get(random.nextInt(moves.size()));
+            }
+
+
+            return new TicketMove(view.getCurrentPlayer(),fromTransport(edge.data()),edge.destination().value());
 
         }
 
-        private Move findNodes(Collection<Edge<Integer, Transport>> edges, ScotlandYardPlayer player) {
-            Collection<Edge<Integer, Transport>> edge = validMoves.filterMoves(edges, player, aiHelper.detective());
+        private Edge<Integer,Transport> edgeIntegerHashMap(ScotlandYardView view, int location){
+            HashMap<Edge<Integer,Transport>, Integer> distanceFromMrXMap = findNodes(view,location);
+
+
+            distanceFromMrXMap.putAll(findNodess(view,location));
+            if(distanceFromMrXMap.isEmpty()){
+                return null;
+            }
+
+            System.out.println("SHOUYLD HAVE SECERT" + distanceFromMrXMap);
+            //System.out.println(distanceFromMrXMap.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey());
+
+            return distanceFromMrXMap.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey();
+        }
+
+
+
+
+        private HashMap<Edge<Integer,Transport>,Integer> findNodes( ScotlandYardView view, int location) {
+            ScotlandYardPlayer player = aiHelper.getCurrentPlayer();
+
+            Collection<Edge<Integer, Transport>> edge = validMoves.filterMoves(validMoves.PossibleMoves(player.location()), player, aiHelper.detective());
+            edge.addAll(validMoves.getEdges(location,view));
             Optional<Edge<Integer, Transport>> eps = validMoves.filterMoves(edge, player, aiHelper.detective()).stream().findFirst();
+            HashMap<Edge<Integer,Transport>, Integer> edgeIntegerHashMap = new HashMap<>();
 
-            int availableNodes = 0;
-            int availableNodes1 = 0;
+            int availableNodes = 1;
 
-            Edge<Integer, Transport> locationNode = eps.orElseThrow();
-            Edge<Integer, Transport> locationNode1 = eps.orElseThrow();
-
-            locationNode = findNodeHelper(player,edge,locationNode,availableNodes);
-
-
-            if(aiHelper.rounds.get(aiHelper.getCurrentRound()) && player.hasTickets(DOUBLE)){
-                Collection<Edge<Integer, Transport>> newEdges = validMoves.filterMoves
-                        (validMoves.PossibleMoves(locationNode.destination().value()),player,aiHelper.detective());
-
-                locationNode1 = findNodeHelper(player,newEdges,locationNode1,availableNodes1);
-
-                System.out.println("Edge " + edge);
-                System.out.println(locationNode);
-
-
-
-                return new DoubleMove(aiHelper.getCurrentPlayer().colour(),fromTransport(locationNode.data()),locationNode.destination().value(),
-                        fromTransport(locationNode1.data()),locationNode1.destination().value());
+            for (Edge<Integer, Transport> edge1 : edge) {
+                int destinationValue = edge1.destination().value();
+                int n = (int) Math.floor(validMoves.filterMoves(validMoves.PossibleMoves(destinationValue), player, aiHelper.detective()).size() / 2);
+                if (validMoves.filterMoves(validMoves.PossibleMoves(destinationValue), player,
+                        aiHelper.detective()).size() > availableNodes) {
+                    edgeIntegerHashMap.put(edge1,0);
+                    availableNodes = 1;
+                }
             }
-            else{
-                return new TicketMove(aiHelper.getCurrentPlayer().colour(), fromTransport(locationNode.data()),
-                        locationNode.destination().value());
-            }
-
+            return edgeIntegerHashMap;
         }
-        private Collection<Edge<Integer,Transport>> commonMoves(){
-            Collection<Edge<Integer,Transport>> commonEdge = new HashSet<>();
 
-            for(ScotlandYardPlayer player : aiHelper.detective()){
-                commonEdge.addAll(validMoves.filterMoves(validMoves.PossibleMoves(player.location()), player, aiHelper.detective()));
+
+        private HashMap<Edge<Integer,Transport>,Integer> findNodess(ScotlandYardView view, int location) {
+            int DD = 0;
+            List<Edge<Integer,Transport>> ee = new ArrayList<>(validMoves.PossibleMoves(location));
+            List<Node<Integer>> dectiveNodeList = new ArrayList<>();
+
+            for (ScotlandYardPlayer player : aiHelper.detective()){
+                dectiveNodeList.add(view.getGraph().getNode(player.location()));
             }
-            return commonEdge;
+
+            HashMap<Node<Integer>, Integer> distancesToNodes = djikstra.getMinDistancesToNodes(location);
+            HashMap<Edge<Integer,Transport>,Integer> eddd = new HashMap<>();
+            Collection<Edge<Integer,Transport>> edgeCollection =  validMoves.filterMoves(validMoves.PossibleMoves(aiHelper.getCurrentPlayer().location()),aiHelper.getCurrentPlayer(),aiHelper.detective());
+            edgeCollection.addAll(validMoves.getEdges(location,view));
+            for (Edge<Integer,Transport> e : edgeCollection) {
+                for (Node<Integer> node : dectiveNodeList) {
+                    if (distancesToNodes.get(node) == 1) {
+                        eddd.put(e,1);
+                    }
+                    if (distancesToNodes.get(node) == 2) {
+                        eddd.put(e,2);
+                    }
+                    if (distancesToNodes.get(node) == 3) {
+                        eddd.put(e,3);
+                    }
+                    if (distancesToNodes.get(node) > 3) {
+                        eddd.put(e,5);
+                    }
+                }
+            }
+
+
+            System.out.println("This is largest node with disatnce found" + DD);
+            return eddd;
         }
-//
-//        private Move move(ScotlandYardView view){
-//           Optional < Edge<Integer, Transport>> edge = findNodes(validMoves.PossibleMoves(aiHelper.getPlayerLocation(view.getCurrentPlayer()))
-//                    , aiHelper.getCurrentPlayer()).stream().findFirst();
-//           Edge<Integer,Transport> e = edge.orElseThrow();
-//
-//           if (aiHelper.rounds.get(aiHelper.getCurrentRound())){
-//               Optional < Edge<Integer, Transport>> edgesss = findNodes(validMoves.PossibleMoves(aiHelper.getPlayerLocation(view.getCurrentPlayer()))
-//                       , aiHelper.getCurrentPlayer()).stream().skip(1).findFirst();
-//               Edge<Integer,Transport> ee = edgesss.orElseThrow();
-//               return new DoubleMove(view.getCurrentPlayer(),fromTransport(e.data()),e.destination().value(),fromTransport(ee.data()),ee.destination().value());
-//           }
-//
-//                return new TicketMove(view.getCurrentPlayer(), fromTransport(e.data()),
-//                    e.destination().value());
-//
-//        }
 
 
-//        private int ticket (Edge<Integer, Transport> edges){
-//            Ticket ticket = fromTransport(edges.data());
-//            List<Integer> ticketwight = ticketWeight(aiHelper.getCurrentPlayer().colour());
-//
-//            int taxi = ticketwight.get(0);
-//            int bus = ticketwight.get(1);
-//            int underground = ticketwight.get(2);
-//            int doublem = ticketwight.get(3);
-//            int secert = ticketwight.get(4);
-//
-//            if (ticket == TAXI) return taxi;
-//            if (ticket == BUS) return bus;
-//            if (ticket == UNDERGROUND) return underground;
-//            if (ticket == SECRET) return secert;
-//            if (ticket == DOUBLE) return doublem;
-//
-//            return 0;
-//        }
-//
-//      private List<Integer> ticketWeight( Colour colour) {
-//            List<Integer> ticketScore = new ArrayList<>();
-//          int taxiWeight = 10;
-//          int busWeight = 8;
-//          int unaWeight = 8;
-//          int secWeight = 4;
-//          int doubtWeigh = 2;
-//
-//          for (Ticket t : Ticket.values()){
-//              if (t == TAXI)ticketScore.add(aiHelper.getPlayerTickets(colour,TAXI) * taxiWeight);
-//              if (t == BUS) ticketScore.add(aiHelper.getPlayerTickets(colour,BUS)* busWeight);
-//              if (t == UNDERGROUND) ticketScore.add(aiHelper.getPlayerTickets(colour,UNDERGROUND) * unaWeight);
-//              if (t == SECRET) ticketScore.add(aiHelper.getPlayerTickets(colour,SECRET) * secWeight);
-//              if (t == DOUBLE) ticketScore.add(aiHelper.getPlayerTickets(colour,DOUBLE)* doubtWeigh);
-//          }
-//          return ticketScore;
-//      }
-//
-//    }
+
     }
+
+
 }
+
+
 
