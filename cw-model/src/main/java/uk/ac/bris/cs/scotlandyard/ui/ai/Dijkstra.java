@@ -17,7 +17,6 @@ class Dijkstra {
     Dijkstra(ScotlandYardView view) {
         this.graph = view.getGraph();
     }
-
     HashMap<Node<Integer>,Integer> shortestPath(int location){
         int Nodes= graph.size() + 1;
         int[] distance = new int[Nodes];

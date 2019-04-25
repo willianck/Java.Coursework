@@ -117,7 +117,6 @@ public class MyAI implements PlayerFactory {
                 else return 0;
             }).get().getKey();
         }
-
         private HashMap<Edge<Integer,Transport>,Integer> findNodes( ScotlandYardView view, int location) {
             ScotlandYardPlayer player = aiHelper.getCurrentPlayer();
 

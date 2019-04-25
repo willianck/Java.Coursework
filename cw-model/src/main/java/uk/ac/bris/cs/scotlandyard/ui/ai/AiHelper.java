@@ -33,7 +33,6 @@ public class AiHelper {
         this.currentPlayer = this.players.get(aiHelper.players.lastIndexOf(aiHelper.currentPlayer));
         this.rounds = getRounds();
     }
-
     //Returns a list of detectives
     public List<ScotlandYardPlayer> detective() {
         List <ScotlandYardPlayer> detectives = new ArrayList <> ( );
