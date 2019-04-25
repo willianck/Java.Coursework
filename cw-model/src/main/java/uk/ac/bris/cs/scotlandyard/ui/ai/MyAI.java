@@ -44,10 +44,13 @@ public class MyAI implements PlayerFactory {
                 //make List of players
 
             score = new Score(view,location);
-            score.FreedomOfMovement(location);
+            score.FreedomOfMovement();
+            score.EscapeMove();
             //score.GoodMove();
-                //System.out.println("COMMON : " + commonMoves());
+            //System.out.println("GOOD MOVE HAS BEEN CALLED");
+
                 callback.accept( score.GetBestMove());
+            System.out.println("Movemade : " + score.GetBestMove());
 
 
             }
