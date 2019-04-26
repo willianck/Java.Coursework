@@ -34,13 +34,6 @@ public class PlayerConfiguration {
 
         }
 
-        /**
-         * @return the colour of the player
-         */
-        public PlayerConfiguration clone() {
-            PlayerConfiguration player = new PlayerConfiguration(this.colour,this.location,this.tickets);
-            return player;
-        }
 
         /**
          * @return the colour of the player
