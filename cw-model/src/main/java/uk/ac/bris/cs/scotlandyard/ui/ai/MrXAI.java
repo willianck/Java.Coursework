@@ -3,23 +3,15 @@ package uk.ac.bris.cs.scotlandyard.ui.ai;
 import java.util.*;
 import java.util.function.Consumer;
 
-import com.sun.jdi.IntegerValue;
-import uk.ac.bris.cs.gamekit.graph.Edge;
-import uk.ac.bris.cs.gamekit.graph.Graph;
-import uk.ac.bris.cs.gamekit.graph.Node;
+
 import uk.ac.bris.cs.scotlandyard.ai.ManagedAI;
 import uk.ac.bris.cs.scotlandyard.ai.PlayerFactory;
 import  uk.ac.bris.cs.scotlandyard.model.*;
-import static uk.ac.bris.cs.scotlandyard.model.Colour.BLACK;
-import uk.ac.bris.cs.scotlandyard.model.ScotlandYardPlayer;
-
-
-import static uk.ac.bris.cs.scotlandyard.model.Ticket.*;
 
 
 @SuppressWarnings("SpellCheckingInspection")
 @ManagedAI("NIGNOG")
-public class MyAI implements PlayerFactory {
+public class MrXAI implements PlayerFactory {
 
     // TODO create a new player here
     @Override

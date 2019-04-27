@@ -33,6 +33,7 @@ public class Score implements  MoveVisitor {
     // Map of MrX Moves and their corresponding scores
     private  HashMap<Move,Integer > bestMoves = new HashMap<>();
 
+
     private static List<Ticket> Types = new ArrayList<>(Arrays.asList(TAXI, BUS , UNDERGROUND, SECRET, DOUBLE));
 
 
@@ -152,7 +153,8 @@ public class Score implements  MoveVisitor {
         return moves;
     }
 
-// Assign scores to edges which opens the most possible moves and Gets MrX away from Detectives
+
+// Scoring function for the Moves which opens the most possible moves and Gets MrX away from Detectives
 
     public void ScoreMoves() {
         Set<Move> MrxMove = MrXMoves(players.get(0));
@@ -178,7 +180,6 @@ private int Max(){
        if(maxKeys.size()>1) {
             for (Move m : maxKeys) {
                 if(m.getClass()== DoubleMove.class){ continue; }
-
                     TicketMove m1 = (TicketMove) m;
                     if (m1.ticket() != SECRET) return m1;
                 }
@@ -186,50 +187,48 @@ private int Max(){
         return maxKeys.get(0);
  }
 
- // Calculates Shortest Path when Using Ticket Move
-     private Integer TMoveDist(TicketMove m ) {
-         Set<Integer> detectiveLocations = PlayerLocation();
-         List<Integer> list = new ArrayList<>();
-         for(Integer p : detectiveLocations){
-             list.add(djikstra.ShortestPath(graph,m.destination(),p));
-
-         }
-         return Collections.max(list);
-     }
-
-//Calculate Shortest Path when Using Double Move
-     private Integer DMoveDist(DoubleMove m){
-         Set<Integer> detectiveLocations = PlayerLocation();
-         List<Integer> list = new ArrayList<>();
-         for(Integer p : detectiveLocations){
-             list.add(djikstra.ShortestPath(graph,m.finalDestination(),p));
-         }
-         return Collections.max(list);
-     }
-
-// Secret Ticket Used when After Reveal Round
+// Best Secret Ticket Used when After Reveal Round
      private Move SelectSecret(){
          Move dummyMove=null;
-         for(Move m : bestMoves.keySet()){
-                 if(m.getClass() ==TicketMove.class){
-                     TicketMove move1 = (TicketMove) m;
-                     if(move1.ticket()==SECRET) dummyMove=m;
+         Integer largestValue=0;
+         for(Map.Entry<Move,Integer> map : bestMoves.entrySet()){
+             if(map.getKey().getClass()== TicketMove.class){
+                 TicketMove m = (TicketMove) map.getKey();
+                 if(m.ticket()==SECRET){
+                     if(map.getValue()>largestValue) largestValue=map.getValue();
                  }
+             }
+         }
+         for(Map.Entry<Move,Integer> entry : bestMoves.entrySet()) {
+             if (entry.getKey().getClass() == TicketMove.class) {
+                 TicketMove m = (TicketMove) entry.getKey();
+                 if (Objects.equals(largestValue, entry.getValue()) && m.ticket() == SECRET)
+                 dummyMove = entry.getKey();
+             }
          }
          return dummyMove;
          }
 
-// Double Ticket Used when After Reveal Round
+
+
+// Best Double Ticket Used when After Reveal Round
       private Move SelectDouble(){
         Move dummyMove= null;
-        for(Move m : bestMoves.keySet()){
-            if(m.getClass()== DoubleMove.class){
-                DoubleMove m1= (DoubleMove) m;
-                dummyMove= m1;
-            }
-        }
+        Integer largestValue= 0;
+          for (Map.Entry<Move, Integer> map : bestMoves.entrySet()) {
+              if(map.getKey().getClass()==DoubleMove.class){
+                  if(map.getValue()>largestValue)  largestValue=map.getValue();
+              }
+          }
+          for( Map.Entry<Move,Integer> entry : bestMoves.entrySet()){
+              if( Objects.equals(largestValue,entry.getValue()) && entry.getKey().getClass()==DoubleMove.class)
+                  dummyMove= entry.getKey();
+          }
         return dummyMove;
       }
+
+
+
 
       // Checks if player has Secret and it is after a  Reveal Round
          private boolean SecretAfterRevealRound(){
@@ -240,7 +239,7 @@ private int Max(){
        // Check if player has Double and it is after a Reveal Round
          private boolean DoubleAfterRevealRound(){
            PlayerConfiguration player = players.get(0);
-           return (player.hasTickets(DOUBLE,1) && rounds.get(currentRound-1));
+           return (player.hasTickets(DOUBLE,1) &&  rounds.get(currentRound-1));
          }
 
 // Global Function which Select the Best Move to be played by MrX
@@ -252,22 +251,37 @@ private int Max(){
              return SingleMove();
          }
 
-// Visit Ticket Move to add their scores
+// Visit Ticket Move to add compute their  scores
     @Override
     public void visit(TicketMove move) {
         Set<Move> NextMove = getMoves(move.destination());
         bestMoves.put(move, NextMove.size());
-        bestMoves.compute(move, (key, val) -> (val == null) ? 1 : val +  TMoveDist(move));
+        Set<Integer> detectiveLocations = PlayerLocation();
+        List<Integer> list = new ArrayList<>();
+        for(Integer p : detectiveLocations){
+            list.add(djikstra.ShortestPath(graph,move.destination(),p));
+
+        }
+        int maxDist = Collections.max(list);
+        bestMoves.compute(move, (key, val) -> (val == null) ? 1 : val +  maxDist);
 
     }
 
-    // Visit Double Move to add their scores
+    // Visit Double Move to compute their  scores
     @Override
     public void visit(DoubleMove move) {
-       // Calculated Average Size of possible moves outcome  based on A Sample Game
-       int AverageSize = 2;
-         bestMoves.put(move,AverageSize);
-        bestMoves.compute(move, (key, val) -> (val == null) ? 1 : val +  DMoveDist(move));
+       // Default Score for DoubleMove as these are Special ticket Which use is not base
+        // on the amount of possible nodes they open up for  a Move
+       final int def = 1;
+         bestMoves.put(move,def);
+        Set<Integer> detectiveLocations = PlayerLocation();
+        List<Integer> list = new ArrayList<>();
+        for(Integer p : detectiveLocations){
+            list.add(djikstra.ShortestPath(graph,move.finalDestination(),p));
+        }
+        int maxDist =Collections.max(list);
+        bestMoves.compute(move, (key, val) -> (val == null) ? 1 : val +  maxDist);
+
 
     }
 }
