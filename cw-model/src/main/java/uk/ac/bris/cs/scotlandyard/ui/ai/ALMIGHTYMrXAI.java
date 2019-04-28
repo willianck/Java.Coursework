@@ -10,8 +10,8 @@ import  uk.ac.bris.cs.scotlandyard.model.*;
 
 
 @SuppressWarnings("SpellCheckingInspection")
-@ManagedAI("NIGNOG")
-public class MrXAI implements PlayerFactory {
+@ManagedAI("ALMIGHTYMrXAI")
+public class ALMIGHTYMrXAI implements PlayerFactory {
 
     // TODO create a new player here
     @Override

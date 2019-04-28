@@ -37,7 +37,6 @@ public class Djikstra {
                     p = n.value();
                 }
             }
-
             Collection<Edge<Integer, Transport>> edges = graph.getEdgesFrom(graph.getNode(p));
 
             for (Edge<Integer, Transport> e : edges) {
@@ -45,10 +44,10 @@ public class Djikstra {
                 if (dist[l] > dist[p] + Weight(e.data()))  dist[l] = dist[p] + Weight(e.data());
             }
                unvisited.remove(graph.getNode(p));
-                if (p == endLocation) return dist[endLocation] - dist[location];
-                if (unvisited.size()==0) return dist[endLocation] - dist[location];
+                if (p == endLocation) return dist[endLocation];
+                if (unvisited.size()==0) return dist[endLocation];
         }
-        return dist[endLocation] - dist[location];
+        return dist[endLocation];
     }
 
 

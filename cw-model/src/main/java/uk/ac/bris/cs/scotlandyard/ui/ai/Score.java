@@ -254,33 +254,35 @@ private int Max(){
 // Visit Ticket Move to add compute their  scores
     @Override
     public void visit(TicketMove move) {
+        int score=0;
         Set<Move> NextMove = getMoves(move.destination());
         bestMoves.put(move, NextMove.size());
-        Set<Integer> detectiveLocations = PlayerLocation();
-        List<Integer> list = new ArrayList<>();
-        for(Integer p : detectiveLocations){
-            list.add(djikstra.ShortestPath(graph,move.destination(),p));
-
+        for(PlayerConfiguration p : detective()){
+            int distance =djikstra.ShortestPath(graph,move.destination(),p.location());
+            // Negatively scores the move as It is close to detectives
+            if(distance<=4) score -= 50;
+            else score += distance;
         }
-        int maxDist = Collections.max(list);
-        bestMoves.compute(move, (key, val) -> (val == null) ? 1 : val +  maxDist);
+        int a= score;
+        bestMoves.compute(move, (key, val) -> (val == null) ? 1 : val +  a);
 
     }
 
     // Visit Double Move to compute their  scores
     @Override
     public void visit(DoubleMove move) {
+        int score = 0;
        // Default Score for DoubleMove as these are Special ticket Which use is not base
         // on the amount of possible nodes they open up for  a Move
        final int def = 1;
          bestMoves.put(move,def);
-        Set<Integer> detectiveLocations = PlayerLocation();
-        List<Integer> list = new ArrayList<>();
-        for(Integer p : detectiveLocations){
-            list.add(djikstra.ShortestPath(graph,move.finalDestination(),p));
+        for(PlayerConfiguration p : detective()){
+            int distance = (djikstra.ShortestPath(graph,move.finalDestination(),p.location()));
+            if(distance<=4) score -=50;
+            else score +=distance;
         }
-        int maxDist =Collections.max(list);
-        bestMoves.compute(move, (key, val) -> (val == null) ? 1 : val +  maxDist);
+        int a = score;
+        bestMoves.compute(move, (key, val) -> (val == null) ? 1 : val + a);
 
 
     }
