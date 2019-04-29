@@ -3,7 +3,7 @@ package uk.ac.bris.cs.scotlandyard.ui.ai;
 import uk.ac.bris.cs.gamekit.graph.Edge;
 import uk.ac.bris.cs.gamekit.graph.Graph;
 import uk.ac.bris.cs.gamekit.graph.Node;
-import uk.ac.bris.cs.scotlandyard.model.*;
+import uk.ac.bris.cs.scotlandyard.model.Transport;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +21,7 @@ import java.util.List;
      *
      */
 
-     Integer ShortestPath(Graph<Integer, Transport> graph, int location, int endLocation) {
+     Integer shortestPath(Graph<Integer, Transport> graph, int location, int endLocation) {
         Integer p = -1;
         Integer minDistance =Integer.MAX_VALUE;
          List<Node<Integer>> unvisited = new ArrayList<>(graph.getNodes());
@@ -40,7 +40,7 @@ import java.util.List;
 
             for (Edge<Integer, Transport> e : edges) {
                 int l = e.destination().value();
-                if (dist[l] > dist[p] + Weight(e.data()))  dist[l] = dist[p] + Weight(e.data());
+                if (dist[l] > dist[p] + weight(e.data()))  dist[l] = dist[p] + weight(e.data());
             }
                unvisited.remove(graph.getNode(p));
                 if (p == endLocation) return dist[endLocation];
@@ -51,7 +51,7 @@ import java.util.List;
 
 
     // Weight Each edge Using the cost of Transportation as Integer value
-    private int Weight(Transport t) {
+    private int weight(Transport t) {
          int a=-1;
         switch (t) {
             case TAXI:

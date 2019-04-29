@@ -1,12 +1,16 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai;
 
-import java.util.*;
-import java.util.function.Consumer;
-
-
 import uk.ac.bris.cs.scotlandyard.ai.ManagedAI;
 import uk.ac.bris.cs.scotlandyard.ai.PlayerFactory;
-import  uk.ac.bris.cs.scotlandyard.model.*;
+import uk.ac.bris.cs.scotlandyard.model.Colour;
+import uk.ac.bris.cs.scotlandyard.model.Move;
+import uk.ac.bris.cs.scotlandyard.model.Player;
+import uk.ac.bris.cs.scotlandyard.model.ScotlandYardView;
+
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Set;
+import java.util.function.Consumer;
 
 
 @ManagedAI("ALMIGHTYMrXAI")
@@ -20,7 +24,6 @@ public class ALMIGHTYMrXAI implements PlayerFactory {
     }
 
     private static class MyPlayer implements Player {
-        private Score score;
         private final Random random = new Random();
 
         @Override
@@ -28,11 +31,11 @@ public class ALMIGHTYMrXAI implements PlayerFactory {
                              Consumer<Move> callback) {
 
             Move m = new ArrayList<>(moves).get(random.nextInt(moves.size()));
-            score = new Score(view, location);
-            score.ScoreMoves();
+            Score score = new Score(view, location);
+            score.scoreMoves();
             // Random Move To prevent null Pointer Exceptions
-            if(score.ChooseAMove()==null) callback.accept(m);
-            callback.accept(score.ChooseAMove());
+            if(score.chooseAMove()==null) callback.accept(m);
+            callback.accept(score.chooseAMove());
         }
     }
 }

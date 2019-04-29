@@ -2,6 +2,7 @@ package uk.ac.bris.cs.scotlandyard.ui.ai;
 
 import uk.ac.bris.cs.scotlandyard.model.Colour;
 import uk.ac.bris.cs.scotlandyard.model.Ticket;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +13,7 @@ import java.util.Map;
  */
 
 
-public class PlayerConfiguration {
+class PlayerConfiguration {
 
 
         private final Colour colour;
