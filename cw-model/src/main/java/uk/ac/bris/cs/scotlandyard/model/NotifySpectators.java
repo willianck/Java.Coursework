@@ -36,28 +36,28 @@ public class NotifySpectators {
         }
     }
 
-    public void GameisOver(ScotlandYardView view, Set<Colour> win){
+    public void gameIsOver(ScotlandYardView view, Set<Colour> win){
         for (Spectator spectator : spectators){
             spectator.onGameOver(view, win);
         }
     }
 
     //A helper method to notify all the spectators that a round has started
-    public void RoundhasStarted(ScotlandYardView view, int currentRound){
+    public void roundHasStarted(ScotlandYardView view, int currentRound){
         for (Spectator spectator : spectators){
             spectator.onRoundStarted(view, currentRound);
         }
     }
 
     //A helper method to notify all the spectators that a move has been made
-    public void MoveisMade(ScotlandYardView view, Move move){
+    public void moveIsMade(ScotlandYardView view, Move move){
         for (Spectator spectator : spectators){
             spectator.onMoveMade(view, move);
         }
     }
 
     //A helper method to notify all the spectators that a round has ended
-    public void RotationisComplete(ScotlandYardView view){
+    public void rotationIsComplete(ScotlandYardView view){
         for (Spectator spectator : spectators){
             spectator.onRotationComplete(view);
         }
