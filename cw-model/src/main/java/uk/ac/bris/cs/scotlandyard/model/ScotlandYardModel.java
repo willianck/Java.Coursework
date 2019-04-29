@@ -270,8 +270,8 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 	//Helper method for TicketMove and DoubleMove
 	private void visitHelper(TicketMove move) {
 		currentRound++;
-		spectators.RoundhasStarted(this, currentRound);
-		spectators.MoveisMade(this, move);
+		spectators.roundHasStarted(this, currentRound);
+		spectators.moveIsMade(this, move);
 	}
 
 
@@ -419,10 +419,10 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 		}
 		else {
 			if (isGameOver()) {
-				spectators.GameisOver(this, getWinningPlayers());
+				spectators.gameIsOver(this, getWinningPlayers());
 			}
 			else {
-				spectators.RotationisComplete(this);
+				spectators.rotationIsComplete(this);
 			}
 		}
 	}
@@ -430,7 +430,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 
 	@Override
 	public void visit(PassMove move) {
-		spectators.MoveisMade(this, move);
+		spectators.moveIsMade(this, move);
 	}
 
 
@@ -442,7 +442,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 
 		if (player.isDetective()) {
 			players.get(0).addTicket(move.ticket());
-			spectators.MoveisMade(this, move);
+			spectators.moveIsMade(this, move);
 		}
 		else {
 			lastLocation = updateLastLocation (lastLocation, move.destination (),currentRound);
@@ -473,7 +473,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 
 		DoubleMove NotifyMove = new DoubleMove(player.colour(), FMove, SMove);
 
-		spectators.MoveisMade(this, NotifyMove);
+		spectators.moveIsMade(this, NotifyMove);
 
 		lastLocation = firstMoveLastLocation;
 

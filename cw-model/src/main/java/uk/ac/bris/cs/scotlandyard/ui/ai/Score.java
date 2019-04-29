@@ -3,20 +3,21 @@ package uk.ac.bris.cs.scotlandyard.ui.ai;
 import uk.ac.bris.cs.gamekit.graph.Edge;
 import uk.ac.bris.cs.gamekit.graph.Graph;
 import uk.ac.bris.cs.scotlandyard.model.*;
-import static uk.ac.bris.cs.scotlandyard.model.Colour.BLACK;
-import static uk.ac.bris.cs.scotlandyard.model.Ticket.*;
 
 import java.util.*;
 
+import static uk.ac.bris.cs.scotlandyard.model.Colour.BLACK;
+import static uk.ac.bris.cs.scotlandyard.model.Ticket.*;
 
 
-public class Score implements  MoveVisitor {
+
+class Score implements  MoveVisitor {
 
     private final List<PlayerConfiguration> players;
     private final Graph<Integer, Transport> graph;
     private final int currentRound;
     private final List<Boolean> rounds;
-    private Dijkstra dijkstra;
+    private final Dijkstra dijkstra;
 
     /** Score class that encapsulate the Model Functions and the AI one move Ahead methods with Dijkstra Algorithm
      *
@@ -33,9 +34,9 @@ public class Score implements  MoveVisitor {
     }
 
     // Map of MrX Moves and their corresponding scores
-    private  HashMap<Move,Integer > bestMoves = new HashMap<>();
+    private final HashMap<Move,Integer > bestMoves = new HashMap<>();
 
-    private  List<Ticket> Types = new ArrayList<>(Arrays.asList(TAXI, BUS , UNDERGROUND, SECRET, DOUBLE));
+    private final List<Ticket> Types = new ArrayList<>(Arrays.asList(TAXI, BUS , UNDERGROUND, SECRET, DOUBLE));
 
 
 // Gets a List of players from class PlayerConfiguration
@@ -69,7 +70,7 @@ public class Score implements  MoveVisitor {
     }
 
   // List of Detectives
-    public List<PlayerConfiguration> detective() {
+  private List<PlayerConfiguration> detective() {
         List<PlayerConfiguration> detectives = new ArrayList<>();
         for (PlayerConfiguration player : players) {
             if (player.colour() != BLACK) {
