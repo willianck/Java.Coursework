@@ -172,7 +172,7 @@ class Score implements  MoveVisitor {
     }
 
     // Retrieves the Max Score
-private int Max(){
+private int max(){
         return Collections.max(bestMoves.values());
 }
 
@@ -182,7 +182,7 @@ private int Max(){
  private Move singleMove(){
         List<Move> maxKeys= new ArrayList<>();
         for(Map.Entry<Move,Integer> entry : bestMoves.entrySet()){
-            if(entry.getValue()== Max()) maxKeys.add(entry.getKey());
+            if(entry.getValue()== max()) maxKeys.add(entry.getKey());
         }
 
        if(maxKeys.size()>1) {
