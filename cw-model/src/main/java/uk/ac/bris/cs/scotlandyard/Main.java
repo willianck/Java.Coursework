@@ -3,7 +3,6 @@ package uk.ac.bris.cs.scotlandyard;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import uk.ac.bris.cs.scotlandyard.ui.Utils;
-import uk.ac.bris.cs.scotlandyard.ui.ai.Djikstra;
 import uk.ac.bris.cs.scotlandyard.ui.controller.LocalGame;
 
 /**

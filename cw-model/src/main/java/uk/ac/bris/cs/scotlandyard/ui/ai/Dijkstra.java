@@ -11,7 +11,7 @@ import java.util.List;
 
 
 
-public class Djikstra {
+ class Dijkstra {
 
     /** Calculate Shortest path from Source Location to end point
      *
@@ -21,11 +21,10 @@ public class Djikstra {
      *
      */
 
-    public Integer ShortestPath(Graph<Integer, Transport> graph, int location, int endLocation) {
+     Integer ShortestPath(Graph<Integer, Transport> graph, int location, int endLocation) {
         Integer p = -1;
         Integer minDistance =Integer.MAX_VALUE;
-        List<Node<Integer>> unvisited = new ArrayList<>();
-        unvisited.addAll(graph.getNodes());
+         List<Node<Integer>> unvisited = new ArrayList<>(graph.getNodes());
         Integer[] dist = new Integer[200];
         for (Node<Integer> node : unvisited) {
             dist[node.value()] = minDistance;

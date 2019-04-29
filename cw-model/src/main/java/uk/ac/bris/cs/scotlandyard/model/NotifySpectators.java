@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.SpectatorHelper;
+package uk.ac.bris.cs.scotlandyard.model;
 
 import uk.ac.bris.cs.scotlandyard.model.Colour;
 import uk.ac.bris.cs.scotlandyard.model.Move;
@@ -9,7 +9,7 @@ import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
-public class NotifySpectator {
+public class NotifySpectators {
 
     private ArrayList <Spectator> spectators = new ArrayList <> ();
 

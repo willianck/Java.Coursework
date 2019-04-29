@@ -3,10 +3,12 @@ package uk.ac.bris.cs.scotlandyard.ui.ai;
 import uk.ac.bris.cs.gamekit.graph.Edge;
 import uk.ac.bris.cs.gamekit.graph.Graph;
 import uk.ac.bris.cs.scotlandyard.model.*;
-import java.util.*;
-
 import static uk.ac.bris.cs.scotlandyard.model.Colour.BLACK;
 import static uk.ac.bris.cs.scotlandyard.model.Ticket.*;
+
+import java.util.*;
+
+
 
 public class Score implements  MoveVisitor {
 
@@ -14,16 +16,16 @@ public class Score implements  MoveVisitor {
     private final Graph<Integer, Transport> graph;
     private final int currentRound;
     private final List<Boolean> rounds;
-    private  Djikstra djikstra;
+    private Dijkstra dijkstra;
 
-    /** Score class that encapsulate the Model Functions and the AI one move Ahead methods with Djikstra Algorithm
+    /** Score class that encapsulate the Model Functions and the AI one move Ahead methods with Dijkstra Algorithm
      *
      *
      *
      */
 
-    public Score(ScotlandYardView view, int location) {
-        djikstra= new Djikstra();
+    Score(ScotlandYardView view, int location) {
+        dijkstra = new Dijkstra();
         players = ListOfPlayers(view, location);
         graph = view.getGraph();
         currentRound=view.getCurrentRound();
@@ -33,18 +35,16 @@ public class Score implements  MoveVisitor {
     // Map of MrX Moves and their corresponding scores
     private  HashMap<Move,Integer > bestMoves = new HashMap<>();
 
-
-    private static List<Ticket> Types = new ArrayList<>(Arrays.asList(TAXI, BUS , UNDERGROUND, SECRET, DOUBLE));
-
+    private  List<Ticket> Types = new ArrayList<>(Arrays.asList(TAXI, BUS , UNDERGROUND, SECRET, DOUBLE));
 
 
 // Gets a List of players from class PlayerConfiguration
-    private static List<PlayerConfiguration> ListOfPlayers(ScotlandYardView view, int location) {
+    private  List<PlayerConfiguration> ListOfPlayers(ScotlandYardView view, int location) {
         List<PlayerConfiguration> players = new ArrayList<>();
         for (Colour c : view.getPlayers()) {
             Map<Ticket, Integer> tickets = new HashMap<>();
-            for(Ticket t: Types) tickets.put(t, view.getPlayerTickets(c, t).get());
-            PlayerConfiguration player = new PlayerConfiguration(c, view.getPlayerLocation(c).get(), tickets);
+            for(Ticket t: Types) tickets.put(t, view.getPlayerTickets(c, t).orElse(0));
+            PlayerConfiguration player = new PlayerConfiguration(c, view.getPlayerLocation(c).orElse(0), tickets);
             players.add(player);
         }
         players.get(0).location(location);
@@ -53,9 +53,11 @@ public class Score implements  MoveVisitor {
 
 
     /**  Methods From Model Called via Score
+     *  Returns type PlayerConfiguration
      *
-     * @return
+     *
      */
+
 
     //List of  the Detective Locations
     private  Set<Integer> PlayerLocation() {
@@ -77,12 +79,14 @@ public class Score implements  MoveVisitor {
         return detectives;
     }
 
+
 // All edges from a source point
     private Collection<Edge<Integer, Transport>> PossibleMoves(int location) {
         return graph.getEdgesFrom(graph.getNode(location));
     }
 
-  // All edges accessible after filtering players Location
+
+  // All edges accessible if player is not  located on node
     private Collection<Edge<Integer, Transport>> filterLocation(Collection<Edge<Integer, Transport>> edges) {
         Set<Integer> location = PlayerLocation();
         Collection<Edge<Integer, Transport>> filter_moves = new HashSet<>();
@@ -105,14 +109,14 @@ public class Score implements  MoveVisitor {
         return filter_ticket;
     }
 
-    // Collection of edges accessible by the player during a round
+
+    // Collection of edges only  accessible by the player during a round
     private  Collection<Edge<Integer, Transport>> filterMoves(Collection<Edge<Integer, Transport>> edges,
                                                             PlayerConfiguration player) {
         Collection<Edge<Integer, Transport>> filter_moves = filterLocation(edges);
         filter_moves = filterTicket(filter_moves, player);
         return filter_moves;
     }
-
 
 
     // Special function to get the moves of MrX including double moves . Called on MrX to get his valid moves
@@ -134,6 +138,7 @@ public class Score implements  MoveVisitor {
         return firstMoves;
     }
 
+
     // Function that gets  valid Moves from a source point
     private  Set<Move> getMoves(int location) {
         Set<Move> moves = new HashSet<>();
@@ -153,10 +158,12 @@ public class Score implements  MoveVisitor {
         return moves;
     }
 
-
+    /**
+     * Scoring Class Implementation Starts here !
+     */
 // Scoring function for the Moves which opens the most possible moves and Gets MrX away from Detectives
 
-    public void ScoreMoves() {
+     void ScoreMoves() {
         Set<Move> MrxMove = MrXMoves(players.get(0));
         for (Move m : MrxMove) {
             m.visit(this);
@@ -228,8 +235,6 @@ private int Max(){
       }
 
 
-
-
       // Checks if player has Secret and it is after a  Reveal Round
          private boolean SecretAfterRevealRound(){
              PlayerConfiguration player= players.get(0);
@@ -242,23 +247,25 @@ private int Max(){
            return (player.hasTickets(DOUBLE,1) &&  rounds.get(currentRound-1));
          }
 
+
 // Global Function which Select the Best Move to be played by MrX
-         public Move ChooseAMove() {
-         if(currentRound!=0) {
-             if (SecretAfterRevealRound()) { return SelectSecret(); }
-             if(DoubleAfterRevealRound()) {return SelectDouble(); }
-         }
-             return SingleMove();
+         Move ChooseAMove() {
+            if(currentRound!=0) {
+                if (SecretAfterRevealRound()) { return SelectSecret(); }
+                if(DoubleAfterRevealRound()) {return SelectDouble(); }
+            }
+            return SingleMove();
          }
 
-// Visit Ticket Move to add compute their  scores
+
+// Visit Ticket Move to add and  compute their  scores
     @Override
     public void visit(TicketMove move) {
         int score=0;
         Set<Move> NextMove = getMoves(move.destination());
         bestMoves.put(move, NextMove.size());
         for(PlayerConfiguration p : detective()){
-            int distance =djikstra.ShortestPath(graph,move.destination(),p.location());
+            int distance = dijkstra.ShortestPath(graph,move.destination(),p.location());
             // Negatively scores the move as It is close to detectives
             if(distance<=4) score -= 50;
             else score += distance;
@@ -272,12 +279,12 @@ private int Max(){
     @Override
     public void visit(DoubleMove move) {
         int score = 0;
-       // Default Score for DoubleMove as these are Special ticket Which use is not base
-        // on the amount of possible nodes they open up for  a Move
+       // Default Score for DoubleMove as these are Special ticket which use is not base
+        // on the amount of possible nodes they open up for  a  Move
        final int def = 1;
          bestMoves.put(move,def);
         for(PlayerConfiguration p : detective()){
-            int distance = (djikstra.ShortestPath(graph,move.finalDestination(),p.location()));
+            int distance = (dijkstra.ShortestPath(graph,move.finalDestination(),p.location()));
             if(distance<=4) score -=50;
             else score +=distance;
         }

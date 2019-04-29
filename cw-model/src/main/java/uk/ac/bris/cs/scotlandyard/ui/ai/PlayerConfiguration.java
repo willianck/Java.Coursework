@@ -65,38 +65,14 @@ public class PlayerConfiguration {
             return tickets;
         }
 
-        /**
-         * Adds a ticket to the player's current tickets.
-         *
-         * @param ticket the ticket to be added.
-         */
-        public void addTicket(Ticket ticket) {
-            adjustTicketCount(ticket, 1);
-        }
 
-        /**
-         * Removes a ticket to the player's current tickets.
-         *
-         * @param ticket the ticket to be removed.
-         */
-        public void removeTicket(Ticket ticket) {
-            adjustTicketCount(ticket, -1);
-        }
-
-        public void adjustTicketCount(Ticket ticket, int by) {
-            Integer ticketCount = tickets.get(ticket);
-            ticketCount += by;
-            tickets.remove(ticket);
-            tickets.put(ticket, ticketCount);
-        }
-
-        /**
+    /**
          * Checks whether the player has the given ticket
          *
          * @param ticket the ticket to check for; not null
          * @return true if the player has the given ticket, false otherwise
          */
-        public boolean hasTickets(Ticket ticket) {
+         boolean hasTickets(Ticket ticket) {
             return tickets.get(ticket) != 0;
         }
 
@@ -109,18 +85,17 @@ public class PlayerConfiguration {
          * @return true if the player has the quantity of the given ticket, false
          *         otherwise
          */
-        public boolean hasTickets(Ticket ticket, int quantityInclusive) {
+         boolean hasTickets(Ticket ticket, int quantityInclusive) {
             return tickets.get(ticket) >= quantityInclusive;
         }
 
+
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("ScotlandYardPlayer{");
-            sb.append(", colour=").append(colour);
-            sb.append(", location=").append(location);
-            sb.append(", tickets=").append(tickets);
-            sb.append('}');
-            return sb.toString();
+            return "ScotlandYardPlayer{" + ", colour=" + colour +
+                    ", location=" + location +
+                    ", tickets=" + tickets +
+                    '}';
         }
     }
 
