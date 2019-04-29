@@ -285,24 +285,24 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 
 
 	/// Set of Detectives  Location
-	private  Set<Integer> PlayerLocation() {
-		Set<Integer> PlayerLocation = new HashSet<>();
+	private  Set<Integer> playerLocation() {
+		Set<Integer> playerLocation = new HashSet<>();
 		for (ScotlandYardPlayer player : detective()) {
-			PlayerLocation.add(player.location());
+			playerLocation.add(player.location());
 		}
-		return PlayerLocation;
+		return playerLocation;
 	}
 
 
 	// Collection of  all  possible  edges from  a  node ( player's location)
-	private Collection<Edge<Integer, Transport>> PossibleMoves(int location) {
+	private Collection<Edge<Integer, Transport>> possibleMoves(int location) {
 		return graph.getEdgesFrom(graph.getNode(location));
 	}
 
 
 	// Collection of edges accessible only if there is no player on the node
 	private Collection<Edge<Integer, Transport>> filterLocation(Collection<Edge<Integer, Transport>> edges) {
-		Set<Integer> location = PlayerLocation();
+		Set<Integer> location = playerLocation();
 		Collection<Edge<Integer, Transport>> filter_moves = new HashSet<>();
 		for (Edge<Integer, Transport> edge : edges) {
 			if (!location.contains(edge.destination().value())) {
@@ -334,7 +334,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 
 
 	// gets the next player in the game
-	private ScotlandYardPlayer NextPlayer() {
+	private ScotlandYardPlayer nextPlayer() {
 		ScotlandYardPlayer nextPlayer;
 		currentPlayer = (currentPlayer + 1) % players.size();
 		nextPlayer = players.get(currentPlayer);
@@ -347,7 +347,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 	// Called on all detectives to get their valid Moves
 	private Set<Move> getMoves(int location) {
 		Set<Move> moves = new HashSet<>();
-		Collection<Edge<Integer, Transport>> possible_moves = PossibleMoves(location);
+		Collection<Edge<Integer, Transport>> possible_moves = possibleMoves(location);
 
         Collection<Edge<Integer, Transport>> possible_location = filterLocation(possible_moves);//
 		Collection<Edge<Integer, Transport>> player_moves = filterMoves(possible_moves, players.get(currentPlayer));
@@ -366,7 +366,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 
 
 	// Special function to get the moves of MrX including double moves . Called on MrX to get his valid moves
-	private Set<Move> MrXMoves(ScotlandYardPlayer player) {
+	private Set<Move> mrXMoves(ScotlandYardPlayer player) {
 		Set<Move> firstMoves = getMoves(players.get(0).location());
 		Set<Move> DoubleMoves = new HashSet<>();
 		if ((player.hasTickets(DOUBLE)) && currentRound != rounds.size() - 1) {
@@ -390,7 +390,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 	private Set<Move> validMoves(ScotlandYardPlayer player) {
 		Set<Move> myMoves = getMoves(player.location());
  		 if (player.colour().equals(BLACK) && !myMoves.isEmpty()) {
-			return MrXMoves(player);
+			return mrXMoves(player);
 		} else if (!player.colour().equals(BLACK) && myMoves.isEmpty()) {
 			myMoves.add(new PassMove(player.colour()));
 			return myMoves;
@@ -405,7 +405,7 @@ public class ScotlandYardModel implements ScotlandYardGame, Consumer<Move>, Move
 		requireNonNull(move);
 		ScotlandYardPlayer player;
 		Set<Move> moves = validMoves(players.get(currentPlayer));
-		player = NextPlayer();
+		player = nextPlayer();
 		if (!moves.contains(move)) {
 			throw new IllegalArgumentException("It is Not a Valid Move ");
 		}

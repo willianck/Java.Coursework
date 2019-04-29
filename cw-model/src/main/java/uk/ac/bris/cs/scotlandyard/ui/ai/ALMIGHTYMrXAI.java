@@ -32,10 +32,10 @@ public class ALMIGHTYMrXAI implements PlayerFactory {
 
             Move m = new ArrayList<>(moves).get(random.nextInt(moves.size()));
             Score score = new Score(view, location);
-            score.ScoreMoves();
+            score.scoreMoves();
             // Random Move To prevent null Pointer Exceptions
-            if(score.ChooseAMove()==null) callback.accept(m);
-            callback.accept(score.ChooseAMove());
+            if(score.chooseAMove()==null) callback.accept(m);
+            callback.accept(score.chooseAMove());
         }
     }
 }
